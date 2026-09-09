@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>建设工程招投标评定分离 · 定标要素权重与评审标准模拟计算器（2024版）</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --blue:#185FA5; --bluebg:#E6F1FB; --green:#3B6D11; --greenbg:#EAF3DE;
+    --amber:#BA7517; --amberbg:#FAEEDA; --purple:#534AB7; --purplebg:#EEEDFE;
+    --red:#A32D2D; --redbg:#FCEBEB; --teal:#0F6E56;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.55}
+  header{background:linear-gradient(0deg,#0C447C,#185FA5);color:#fff;padding:18px 24px}
+  header h1{margin:0;font-size:19px;font-weight:600}
+  header p{margin:4px 0 0;font-size:12.5px;opacity:.92}
+  .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .card h2{margin:0 0 12px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .badge{font-size:11px;font-weight:500;color:#fff;background:var(--blue);border-radius:20px;padding:2px 10px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g5{grid-template-columns:repeat(5,1fr)}
+  label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:4px}
+  input,select,button{font-family:inherit;font-size:13px}
+  input[type=text],input[type=number],select{padding:7px 9px;border:1px solid var(--line);border-radius:8px;width:100%;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--bluebg);border-color:var(--blue)}
+  button{cursor:pointer;border:none;border-radius:8px;padding:8px 14px;font-weight:500;background:var(--blue);color:#fff}
+  button.ghost{background:#eef2f7;color:var(--blue);border:1px solid #cdd9e8}
+  button.danger{background:var(--redbg);color:var(--red);border:1px solid #f09595}
+  button.sm{padding:4px 9px;font-size:12px}
+  button.teal{background:var(--teal)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .el-block{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  .el-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+  .el-title{font-weight:600;font-size:14.5px}
+  .sub-row{display:grid;grid-template-columns:190px 80px 72px 84px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-top:1px dashed #eef1f5}
+  .sub-row .nm{font-weight:500;font-size:13px}
+  .sub-row input,.sub-row select{padding:5px 7px}
+  .tag{font-size:11px;padding:1px 7px;border-radius:10px;background:#eef2f7;color:var(--muted)}
+  .tag.cap{background:#fff4e0;color:#a05a00}
+  .vali{font-size:12.5px}
+  .vali .ok{color:var(--green)}
+  .vali .err{color:var(--red);font-weight:500}
+  .vali .warn{color:var(--amber);font-weight:500}
+  .vali div{padding:3px 0;border-bottom:1px solid #f1f4f8}
+  .totals{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin:6px 0 2px}
+  .totals b{font-size:15px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+  th{background:#f3f6fa;font-weight:600}
+  td.l,th.l{text-align:left}
+  .srt{background:none;border:none;cursor:pointer;font-size:10px;padding:0 2px;color:#94a3b8;border-radius:4px}
+  .srt:hover{color:#1d4ed8;background:#e6edff}
+  th.on-srt{color:#1d4ed8;background:#e6edff}
+  th .srt.on-srt{color:#1d4ed8}
+  .cell{width:64px;box-sizing:border-box;border:1px solid var(--line);border-radius:4px;padding:2px 4px;font:inherit;text-align:center;background:#fff}
+  .cell.wide{width:120px;text-align:left}
+  .cell:focus{outline:2px solid var(--blue);border-color:var(--blue)}
+  .scroll{overflow-x:auto}
+  .pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;background:#eef2f7;color:var(--muted)}
+  .pill.red{background:var(--redbg);color:var(--red)}
+  .pill.green{background:var(--greenbg);color:var(--green)}
+  .pill.amber{background:var(--amberbg);color:var(--amber)}
+  .note{font-size:12px;color:var(--muted);background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px}
+  .tabrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .tab{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:8px;padding:6px 14px;font-weight:600}
+  .tab.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .panel{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:12px}
+  .panel .sec-title{margin-top:8px}
+  .disc{font-size:11.5px;color:var(--muted)}
+  .hl{background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:2px 6px}
+  .flex{display:flex;gap:14px;flex-wrap:wrap}
+  .sec-title{font-weight:600;margin:10px 0 6px;font-size:13.5px;color:var(--blue)}
+  fieldset{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0}
+  legend{font-size:12px;color:var(--muted);padding:0 6px}
+  .meth{pointer-events:none;opacity:.5}
+  .meth.on{pointer-events:auto;opacity:1}
+  .result{font-size:14px}
+  .winner{font-size:16px;font-weight:700;color:var(--blue)}
+  .slider{width:100%}
+  .tiny{font-size:11px;color:var(--muted)}
+  .votable{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+  details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:10px;background:#fbfcfe}
+  summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <h1>建设工程招投标评定分离 · 定标要素权重与评审标准模拟计算器（2024版）</h1>
+  <p>依据《厦门市住房和建设局关于印发建设工程招投标评定分离办法的通知》（厦住建规〔2024〕6号）附件1-5构建 · 单文件离线版 · 含附件4入围确定与附件5特征指标参照</p>
+</header>
+<div class="wrap">
+
+  <!-- 全局配置 导入/导出（模块①②③④⑤⑥） -->
+  <div class="card" style="padding:10px 16px">
+    <div class="row">
+      <span class="tiny" style="margin:0 8px 0 0"><b>全部模块配置导入/导出：</b>项目参数① · 要素权重树② · K值引擎③ · 投标人④ · 入围参数⑤ · 定标方法⑥</span>
+      <button class="ghost" id="expConfig">导出全部配置(JSON)</button>
+      <button class="ghost" id="importConfig">导入全部配置(JSON)</button>
+      <input type="file" id="configFile" accept=".json,application/json" style="display:none">
+      <span class="tiny" id="configNote"></span>
+    </div>
+  </div>
+
+  <!-- ① 项目参数 -->
+  <div class="card">
+    <h2>① 项目参数 <span class="badge">驱动校验阈值</span></h2>
+    <div class="grid g4">
+      <div><label>招标类型</label>
+        <select id="bidType">
+          <option value="施工" selected>施工招标</option>
+          <option value="监理">监理招标</option>
+          <option value="设计">设计招标</option>
+          <option value="勘察">勘察招标</option>
+          <option value="勘察设计合并">勘察设计合并招标</option>
+        </select></div>
+      <div><label>所属行业</label>
+        <select id="industry">
+          <option value="房建市政" selected>房建市政</option>
+          <option value="公路水运">公路水运</option>
+          <option value="水利">水利</option>
+          <option value="其他专业">其他专业</option>
+        </select></div>
+      <div><label>质量目标</label>
+        <select id="quality">
+          <option value="0" selected>省优以下</option>
+          <option value="1">省优及以上</option>
+        </select></div>
+      <div><label>设拟派项目负责人陈述答辩</label>
+        <select id="hasDefense">
+          <option value="1" selected>是</option>
+          <option value="0">否</option>
+        </select></div>
+    </div>
+    <div class="grid g4" style="margin-top:10px">
+      <div><label>资格条件资质等级（数字：1=一级，2=二级，3=三级，4=特级；数字越小等级越高）</label>
+        <input type="number" id="qualLevel" value="1" min="1" max="4" step="1"></div>
+      <div><label>最高投标报价限价（万元，低价随机法/入围用）</label>
+        <input type="number" id="maxPrice" value="10000" min="0" step="100"></div>
+      <div><label>启用厦门建设行业信用</label>
+        <select id="hasXiamen">
+          <option value="1" selected>是</option>
+          <option value="0">否</option>
+        </select></div>
+      <div><label>低价随机法·信用靠前下浮(‰) 3–5</label>
+        <input type="number" id="discountPm" value="4" min="3" max="5" step="1"></div>
+    </div>
+    <div class="note" id="paramNote"></div>
+  </div>
+
+  <!-- ② 要素权重树 + 校验 -->
+  <div class="card">
+    <h2>② 定标要素权重树 + 实时合规校验 <span class="badge">附件1 一/二/三/四/五</span></h2>
+    <div class="row" style="margin-bottom:6px">
+      <button class="ghost sm" id="loadTypeDefaults">载入本招标类型默认权重</button>
+      <span class="tiny" id="defaultsNote"></span>
+    </div>
+    <div class="totals" id="totals"></div>
+    <div id="configPanel"></div>
+    <div class="sec-title">合规校验结果（任一要素/子要素改动即重算）</div>
+    <div class="vali" id="validation"></div>
+  </div>
+
+  <!-- ③ 报价 K 值引擎 -->
+  <div class="card">
+    <h2>③ 报价 K 值抽取引擎 <span class="badge">附件1 四(一)4</span></h2>
+    <div class="grid g4">
+      <div><label>抽取区间下限 Kmin(%)</label><input type="number" id="kmin" value="6.00" step="0.01"></div>
+      <div><label>抽取区间上限 Kmax(%)</label><input type="number" id="kmax" value="8.00" step="0.01"></div>
+      <div><label>档位步长(%) ≥1</label><input type="number" id="kstep" value="1.00" step="0.01" min="1"></div>
+      <div><label>当前 K 值(%)</label><input type="number" id="kval" value="7.50" step="0.01"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="drawK">模拟抽取 K（区间内随机）</button>
+      <button class="ghost sm" id="applyK">按上方 K 值应用</button>
+      <span class="tiny" id="kStatus"></span>
+    </div>
+    <div class="sec-title" style="margin-top:10px">各档位得分（可编辑） <span class="tiny">仅作用于 K 值档次表显示；留空=按等差默认值（满分档 100，最低档 = 满分档 50%）</span></div>
+    <div id="kScoreEditor" class="row" style="gap:8px;align-items:flex-end;flex-wrap:wrap"></div>
+    <div class="row" style="margin-top:6px;gap:8px">
+      <button class="ghost sm" id="resetKScores">重置为默认得分</button>
+      <span class="tiny" id="kScoreNote">编辑后立即在下方 K 值档次表中生效；导出"报价档次区间表.csv"时同步采用此得分。</span>
+    </div>
+    <div class="scroll" style="margin-top:10px"><table id="kTable"></table></div>
+    <div class="note">满分区间 = [K−0.5%(含), K+0.5%(不含))；向两侧按步长展开。抽取幅度须 2%–4%、保留两位小数（共 200–400 点位）。报价最低档 = 满分档 50%。</div>
+  </div>
+
+  <!-- ④ 投标人模拟 -->
+  <div class="card">
+    <h2>④ 投标人模拟计分与结果 <span class="badge">落档 · 加权 · 排名 · 联合体</span></h2>
+    <div class="row" style="margin-bottom:10px">
+      <button id="addBidder">+ 添加投标人</button>
+      <button class="ghost sm" id="loadDemo">载入示例(3家)</button>
+      <button class="ghost sm" id="importBidders">导入投标人(CSV)</button>
+      <button class="ghost sm" id="expBidderTemplate">导入模板(CSV)</button>
+      <button class="ghost sm" id="expBidders">导出投标人(CSV)</button>
+      <button class="danger sm" id="clearBidders">清空</button>
+      <span class="tiny" id="importNote"></span>
+      <input type="file" id="importFile" accept=".csv,.txt,text/csv,text/plain" style="display:none">
+    </div>
+    <div class="scroll"><table id="bidderTable"></table></div>
+    <div class="sec-title">综合得分排名 + 得分构成（堆叠）</div>
+    <div id="ranking"></div>
+    <div id="chart" style="margin-top:10px"></div>
+    <div class="sec-title">权重敏感性分析（滑动看排名翻转）</div>
+    <div class="flex" style="align-items:flex-end">
+      <div style="width:150px"><label>从要素</label>
+        <select id="sensFrom"><option selected>信用</option><option>实力</option><option>报价</option><option>评审意见</option></select></div>
+      <div style="width:150px"><label>转移到要素</label>
+        <select id="sensTo"><option>信用</option><option selected>实力</option><option>报价</option><option>评审意见</option></select></div>
+      <div style="flex:1;min-width:220px"><label id="sensLabel">调整幅度：0%</label>
+        <input type="range" class="slider" id="sens" min="-15" max="15" step="1" value="0"></div>
+    </div>
+    <div class="note" id="sensOut"></div>
+  </div>
+
+  <!-- ⑤ 入围确定（附件4） -->
+  <div class="card">
+    <h2>⑤ 资格审查与确定入围投标人模拟 <span class="badge">附件4</span></h2>
+    <div class="grid g4">
+      <div><label>投标报价区间·下浮率(%) 低~高</label>
+        <div class="flex"><input type="number" id="slDlo" value="4" step="0.5"><input type="number" id="slDhi" value="12" step="0.5"></div></div>
+      <div><label>模拟方式</label>
+        <div class="flex"><select id="slSeed"><option value="0">随机生成投标人</option><option value="1">固定种子(可复现)</option></select>
+        <input type="number" id="slSeedVal" value="20260804" min="0" step="1" style="width:120px" title="固定种子号(整数)：相同种子+相同参数生成同一套投标人(含报价与信用名次)"></div></div>
+      <div><label>信用靠前比例(%)（定义"信用排名靠前"）</label>
+        <input type="number" id="slCreditRatio" value="30" min="5" max="100" step="1"></div>
+      <div><label>房建市政折价率(%) 1–2（附件4三(二)4(3)①）</label>
+        <input type="number" id="slEntryDisc" value="1.5" min="1" max="2" step="0.1"></div>
+    </div>
+    <div class="tabrow" style="margin-top:10px">
+      <button class="tab on" id="tab_r3">3–20家</button>
+      <button class="tab" id="tab_r21">21–30家</button>
+      <button class="tab" id="tab_r31">31–50家</button>
+      <button class="tab" id="tab_r51">≥51家</button>
+      <span class="tiny">按投标人数量区间分4种情形分别模拟（附件4三(二)），各情形独立生成、分步入围、导出。</span>
+    </div>
+    <div class="panel" id="panel_r3">
+      <div class="grid g2"><div><label>投标人数量(3–20)</label><input type="number" id="slN_r3" value="15" min="3" max="20" step="1"></div></div>
+      <div class="row" style="margin-top:8px">
+        <button id="genBidders_r3">生成投标人</button>
+        <button class="teal" id="runShortlist_r3">一键模拟入围</button>
+        <button id="simStep1_r3">①报价排序淘汰</button>
+        <button id="simStep2_r3">②确定入围</button>
+        <button class="ghost" id="expShortlist_r3">导出入围名单(CSV)</button>
+      </div>
+      <div class="scroll" style="margin-top:8px"><table id="shortlistTable_r3"></table></div>
+      <div class="note" id="shortlistSummary_r3"></div>
+      <div class="note" id="shortlistNote_r3"></div>
+    </div>
+    <div class="panel" id="panel_r21" style="display:none">
+      <div class="grid g2"><div><label>投标人数量(21–30)</label><input type="number" id="slN_r21" value="25" min="21" max="30" step="1"></div>
+      <div><label>报价靠前/靠后各淘汰数量(1–3)</label><select id="slK_r21"><option value="1">1家</option><option value="2">2家</option><option value="3">3家</option></select></div></div>
+      <div class="row" style="margin-top:8px">
+        <button id="genBidders_r21">生成投标人</button>
+        <button class="teal" id="runShortlist_r21">一键模拟入围</button>
+        <button id="simStep1_r21">①报价排序淘汰</button>
+        <button id="simStep2_r21">②确定入围</button>
+        <button class="ghost" id="expShortlist_r21">导出入围名单(CSV)</button>
+      </div>
+      <div class="scroll" style="margin-top:8px"><table id="shortlistTable_r21"></table></div>
+      <div class="note" id="shortlistSummary_r21"></div>
+      <div class="note" id="shortlistNote_r21"></div>
+    </div>
+    <div class="panel" id="panel_r31" style="display:none">
+      <div class="grid g2"><div><label>投标人数量(31–50)</label><input type="number" id="slN_r31" value="40" min="31" max="50" step="1"></div></div>
+      <div class="row" style="margin-top:8px">
+        <button id="genBidders_r31">生成投标人</button>
+        <button class="teal" id="runShortlist_r31">一键模拟入围</button>
+        <button id="simStep1_r31">①报价排序淘汰</button>
+        <button id="simStep2_r31">②信用排序淘汰</button>
+        <button id="simStep3_r31">③增补入围（折价/补足/增补）</button>
+        <button class="ghost" id="expShortlist_r31">导出入围名单(CSV)</button>
+      </div>
+      <div class="scroll" style="margin-top:8px"><table id="shortlistTable_r31"></table></div>
+      <div class="note" id="shortlistSummary_r31"></div>
+      <div class="note" id="shortlistNote_r31"></div>
+    </div>
+    <div class="panel" id="panel_r51" style="display:none">
+      <div class="grid g2"><div><label>投标人数量(≥51)</label><input type="number" id="slN_r51" value="60" min="51" max="200" step="1"></div></div>
+      <div class="row" style="margin-top:8px">
+        <button id="genBidders_r51">生成投标人</button>
+        <button class="teal" id="runShortlist_r51">一键模拟入围</button>
+        <button id="simStep1_r51">①报价排序淘汰</button>
+        <button id="simStep2_r51">②上下半区随机抽取</button>
+        <button class="ghost" id="expShortlist_r51">导出入围名单(CSV)</button>
+      </div>
+      <div class="scroll" style="margin-top:8px"><table id="shortlistTable_r51"></table></div>
+      <div class="note" id="shortlistSummary_r51"></div>
+      <div class="note" id="shortlistNote_r51"></div>
+    </div>
+  </div>
+
+  <!-- ⑥ 定标方法 -->
+  <div class="card">
+    <h2>⑥ 定标方法（附件2） <span class="badge">综合得分→中标人</span></h2>
+    <div class="row" style="margin-bottom:8px">
+      <label style="margin:0 8px 0 0"><input type="radio" name="meth" value="高分低价法" checked> 高分低价法</label>
+      <label style="margin:0 8px"><input type="radio" name="meth" value="高分随机法"> 高分随机法</label>
+      <label style="margin:0 8px"><input type="radio" name="meth" value="低价随机法"> 低价随机法</label>
+      <label style="margin:0 8px"><input type="radio" name="meth" value="直接票决法"> 直接票决法</label>
+    </div>
+    <div class="row" style="margin-bottom:8px">
+      <label class="tiny" style="margin:0">定标委员会人数（直接票决法用）：
+        <input type="number" id="dingN" value="7" min="5" max="21" step="2" style="width:80px"></label>
+    </div>
+    <div class="note" id="methNote"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="runMethod">执行定标</button>
+      <button class="ghost sm" id="reVote">直接票决法·重新投票</button>
+      <span class="tiny">中标候选人数量：定标候选人（评标推荐）&lt;20家取3家，≥20家取5家。</span>
+    </div>
+    <div id="methodResult" class="result" style="margin-top:12px"></div>
+  </div>
+
+  <!-- ⑦ 输出 -->
+  <div class="card">
+    <h2>⑦ 输出与参照 <span class="badge">公示清单 · 附件5 · 导出</span></h2>
+    <div class="sec-title">中标候选人公示内容（附件1七(一)）</div>
+    <div id="publicResult" class="note"></div>
+    <details>
+      <summary>附件5 · 房屋建筑和市政基础设施工程特征指标标准（业绩特征指标设置参照）</summary>
+      <div class="scroll" style="margin-top:8px"><table id="appendix5Table"></table></div>
+      <div class="disc">注：本标准的"以上"均包含本数。工程业绩特征指标设置不超过招标项目的规模标准（附件1 四(二)3）。</div>
+    </details>
+    <div class="sec-title">导出</div>
+    <div class="row">
+      <button class="ghost" id="expWeight">导出 定标要素权重表(CSV)</button>
+      <button class="ghost" id="expK">导出 报价档次区间表(CSV)</button>
+      <button class="ghost" id="expResult">导出 模拟结果表(CSV)</button>
+      <button class="ghost" id="expReport">导出 定标报告要素(CSV)</button>
+    </div>
+    <div class="disc">CSV 可直接粘贴进定标方案文档。导出内容含附件1各要素权重、分档标准、禁设拦截说明、模拟排名与定标报告要素。</div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+/* ============ 状态 ============ */
+const BAN = ["规模","注册地址","注册资金","市场占有率","负债率","净资产规模"];
+const CATS = ["信用","实力","报价","评审意见"];
+const COLORS = {信用:"#185FA5",实力:"#3B6D11",报价:"#BA7517",评审意见:"#534AB7"};
+const PRESETS = {
+  信用:[
+    {key:"national",name:"国家行业信用评价",cap:null},
+    {key:"provincial",name:"省行业信用评价",cap:null},
+    {key:"xiamen",name:"厦门市建设行业信用分",cap:"xiamen_credit"},
+  ],
+  实力:[
+    {key:"award",name:"工程奖项",cap:"award"},
+    {key:"perf",name:"工程业绩",cap:"perf"},
+    {key:"qual",name:"资质等级",cap:"qual"},
+    {key:"team",name:"拟派团队综合实力",cap:null},
+    {key:"defense",name:"拟派项目负责人陈述答辩",cap:"defense"},
+  ],
+  报价:[
+    {key:"price",name:"报价评审",cap:"price"},
+  ],
+  评审意见:[
+    {key:"comment",name:"评标委员会评审意见",cap:"comment"},
+  ],
+};
+let uid=0;
+function mkSub(preset, opts={}){
+  const base={
+    id:"s"+(++uid), key:preset.key, name:preset.name, cap:preset.cap, isCustom:false,
+    weight: opts.weight!=null?opts.weight:10,
+    tierCount: opts.tierCount||5, zeroTier: opts.zeroTier||false,
+    natMax:1, provMax:2, entMax:2, perMax:1, perNoAward:true,
+    targetLevel:2, emergency:0, aPlus:10,
+  };
+  return Object.assign(base, opts);
+}
+const PANELS=[
+  {key:"r3", min:3, max:20, def:15, title:"3–20家", steps:["①报价排序淘汰","②确定入围"]},
+  {key:"r21", min:21, max:30, def:25, title:"21–30家", steps:["①报价排序淘汰","②确定入围"]},
+  {key:"r31", min:31, max:50, def:40, title:"31–50家", steps:["①报价排序淘汰","②信用排序淘汰","③增补入围"]},
+  {key:"r51", min:51, max:200, def:60, title:"≥51家", steps:["①报价排序淘汰","②上下半区随机抽取"]},
+];
+const state = {
+  project:{bidType:"施工",industry:"房建市政",qualityAbove:false,hasDefense:true,hasXiamen:true,qualLevel:1,maxPrice:10000,discountPm:4,creditRatio:30,entryDisc:1.5},
+  elements:{信用:{subs:[]},实力:{subs:[]},报价:{subs:[]},评审意见:{subs:[]}},
+  k:{kmin:6.00,kmax:8.00,k:7.50,step:1.00,set:true, scoreOverrides:null},
+  bidders:[],
+  panels:{},
+  panelActive:"r3",
+};
+state.panels.r3={shortlist:null,lastShortlist:null,shortlistSort:null,shortlistStep:null};
+state.panels.r21={shortlist:null,lastShortlist:null,shortlistSort:null,shortlistStep:null};
+state.panels.r31={shortlist:null,lastShortlist:null,shortlistSort:null,shortlistStep:null};
+state.panels.r51={shortlist:null,lastShortlist:null,shortlistSort:null,shortlistStep:null};
+const TYPE_DEFAULTS = {
+  施工:{信用:[5,5,10],实力:[10,10,8,7,5],报价:[25],评审意见:[15]},
+  监理:{信用:[8,8,9],实力:[8,10,7,6,4],报价:[25],评审意见:[15]},
+  设计:{信用:[3,3,4],实力:[5,6,4,3,2],报价:[20],评审意见:[50]},
+  勘察:{信用:[5,5,10],实力:[10,10,8,7,5],报价:[25],评审意见:[15]},
+  勘察设计合并:{信用:[3,3,4],实力:[5,6,4,3,2],报价:[20],评审意见:[50]},
+};
+function buildDefaults(){
+  const t=TYPE_DEFAULTS[state.project.bidType];
+  state.elements.信用.subs=[
+    mkSub(PRESETS.信用[0],{weight:t.信用[0]}),
+    mkSub(PRESETS.信用[1],{weight:t.信用[1]}),
+    mkSub(PRESETS.信用[2],{weight:t.信用[2],aPlus:state.project.bidType==="监理"?0:10}),
+  ];
+  state.elements.实力.subs=[
+    mkSub(PRESETS.实力[0],{weight:t.实力[0],zeroTier:true}),
+    mkSub(PRESETS.实力[1],{weight:t.实力[1],zeroTier:true}),
+    mkSub(PRESETS.实力[2],{weight:t.实力[2],targetLevel:(p=>p<=2?1:p-1)(state.project.qualLevel)}),
+    mkSub(PRESETS.实力[3],{weight:t.实力[3]}),
+    mkSub(PRESETS.实力[4],{weight:t.实力[4],emergency:0,zeroTier:true}),
+  ];
+  state.elements.报价.subs=[ mkSub(PRESETS.报价[0],{weight:t.报价[0]}) ];
+  state.elements.评审意见.subs=[ mkSub(PRESETS.评审意见[0],{weight:t.评审意见[0]}) ];
+}
+
+/* ============ 工具 ============ */
+const $=id=>document.getElementById(id);
+const fmt=(n,d=2)=>Number(n).toFixed(d);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+function elWeight(cat){return state.elements[cat].subs.reduce((s,x)=>s+(+x.weight||0),0);}
+function totalWeight(){return CATS.reduce((s,c)=>s+elWeight(c),0);}
+function isDesign(){return state.project.bidType==="设计"||state.project.bidType==="勘察设计合并";}
+function autoTiers(n){
+  n=Math.max(2,Math.round(n||5));
+  const step=50/(n-1), tiers=[];
+  for(let i=0;i<n;i++) tiers.push(Math.round((100-i*step)*10)/10);
+  return tiers;
+}
+function genTiers(sub){
+  if(sub.isCustom && Array.isArray(sub.tiers) && sub.tiers.length===sub.tierCount) return sub.tiers.slice();
+  return autoTiers(sub.tierCount);
+}
+function resizeTiers(sub){
+  let n=Math.max(2,Math.round(sub.tierCount||5));
+  // 档位上限已放开（原限定 3–5 已解除）；非自定义仍需保留 ≥2 下限以保证等差生成合法
+  if(!sub.isCustom) n=Math.max(2,n);
+  if(!Array.isArray(sub.tiers)){ sub.tiers=autoTiers(n); return; }
+  if(sub.tiers.length===n) return;
+  const fresh=autoTiers(n), arr=[];
+  for(let i=0;i<n;i++){
+    const oi=Math.round(i*(sub.tiers.length-1)/(n-1));
+    arr.push(sub.tiers[oi]!=null?sub.tiers[oi]:fresh[i]);
+  }
+  sub.tiers=arr;
+}
+function scoreForTier(sub,t){
+  const tiers=genTiers(sub);
+  if(sub.zeroTier && t===sub.tierCount+1) return 0;
+  return tiers[Math.min(t,sub.tierCount)-1];
+}
+function priceTier(d,K,step,n,zeroTier){
+  if(d>=K-0.5 && d<K+0.5) return 1;
+  const gap = d<K-0.5 ? (K-0.5-d) : (d-(K+0.5));
+  let t=1+Math.ceil(gap/step);
+  if(t>n) return zeroTier? (n+1):n;
+  return t;
+}
+function priceIntervals(K,step,n,zeroTier){
+  const iv=[{tier:1,lo:K-0.5,hi:K+0.5,txt:"满分区间"}];
+  for(let k=2;k<=n;k++){
+    iv.push({tier:k,lo:K-0.5-(k-1)*step,hi:K-0.5-(k-2)*step,txt:"第"+k+"档(低)"});
+    iv.push({tier:k,lo:K+0.5+(k-2)*step,hi:K+0.5+(k-1)*step,txt:"第"+k+"档(高)"});
+  }
+  if(zeroTier) iv.push({tier:n+1,lo:null,hi:null,txt:"零分档"});
+  return iv;
+}
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function randInt(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function mulberry(seed){ let t=seed>>>0; return function(){ t+=0x6D2B79F5; let r=Math.imul(t^t>>>15,1|t); r^=r+Math.imul(r^r>>>7,61|r); return ((r^r>>>14)>>>0)/4294967296; }; }
+function seededShuffle(arr,rng){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function seededBidders(N,dlo,dhi,seed){
+  const rng=mulberry(seed);
+  const arr=[];
+  for(let i=1;i<=N;i++){
+    const d=Math.round((dlo+rng()*(dhi-dlo))*100)/100;
+    arr.push({name:"投标人"+i, d:d, creditRank:i, union:false});
+  }
+  return arr;
+}
+
+/* ============ 渲染：项目参数 ============ */
+function renderParamNote(){
+  const p=state.project;
+  let s=`当前：${p.bidType} / ${p.industry} / 质量目标${p.qualityAbove?"省优及以上":"省优以下"} / 陈述答辩${p.hasDefense?"已设":"未设"} / 厦门信用${p.hasXiamen?"启用":"未启用"} / 资格资质等级 ${p.qualLevel} 级。`;
+  if(isDesign()){
+    s+=" 设计招标以设计方案优劣为定标主要依据（评审意见要素为主），可直接票决法定标（附件2四）。";
+  }else if(p.bidType==="监理"){
+    s+=" 信用权重 20%–30%；厦门监理信用满分档≤A级分值；其余要素参照施工规则审慎设置。";
+  }else{
+    s+=" 信用权重 20%–30%、实力≤50%、报价 20%–30%；房建市政鼓励厦门信用权重≥信用总权重一半。";
+  }
+  $("paramNote").textContent=s;
+  // 直接票决法启用态
+  const voteRadios=document.querySelectorAll('input[name=meth]');
+  voteRadios.forEach(r=>{
+    const on=(r.value==="直接票决法");
+    const enabled=isDesign();
+    r.closest("label").classList.toggle("meth",on&&!enabled);
+    r.disabled=on&&!enabled;
+  });
+  if(isDesign() && document.querySelector('input[name=meth]:checked').value==="直接票决法"){
+    // ok
+  } else if(!isDesign() && document.querySelector('input[name=meth]:checked').value==="直接票决法"){
+    document.querySelector('input[name=meth][value="高分低价法"]').checked=true;
+  }
+}
+
+/* ============ 渲染：要素配置 ============ */
+function renderConfig(){
+  const panel=$("configPanel"); panel.innerHTML="";
+  const bgmap={信用:"var(--bluebg)",实力:"var(--greenbg)",报价:"var(--amberbg)",评审意见:"var(--purplebg)"};
+  CATS.forEach(cat=>{
+    const c=COLORS[cat];
+    const blk=document.createElement("div");
+    blk.className="el-block"; blk.style.borderLeft="4px solid "+c;
+    const head=document.createElement("div"); head.className="el-head";
+    head.innerHTML=`<span class="el-title" style="color:${c}">${cat}要素</span>
+      <span class="tiny">权重合计 <b id="ew_${cat}">${fmt(elWeight(cat),1)}%</b> · 子要素 ${state.elements[cat].subs.length} 个</span>`;
+    const add=document.createElement("button"); add.className="ghost sm"; add.textContent="+ 自定义子要素";
+    add.onclick=()=>addCustom(cat);
+    head.appendChild(add);
+    blk.appendChild(head);
+    state.elements[cat].subs.forEach(sub=>blk.appendChild(subRow(cat,sub,c)));
+    panel.appendChild(blk);
+  });
+  bindConfigInputs();
+  updateLive();
+}
+function subRow(cat,sub,c){
+  const row=document.createElement("div"); row.className="sub-row"; row.dataset.id=sub.id;
+  const isPrice = sub.cap==="price";
+  let html=`<div class="nm">${sub.name}${sub.isCustom?' <span class="tag">自定义</span>':''}${sub.cap?' <span class="tag cap">含上限</span>':''}</div>`;
+  html+=`<div><input type="number" step="0.5" data-f="weight" value="${sub.weight}" title="权重(%)"></div>`;
+  const tMin=sub.zeroTier?2:3;
+  const tAttr=sub.isCustom?`step="1" min="2"`:((sub.zeroTier?`min="2" `:`min="2" `)+`step="1"`);
+  const tTitle=sub.isCustom?"档位数(自定义：不限范围)":`档位数(建议 ${tMin}–5，可调整；≥2 即可)`;
+  html+=`<div><input type="number" ${tAttr} data-f="tierCount" value="${sub.tierCount}" title="${tTitle}"></div>`;
+  html+=`<div><input type="number" step="0.5" min="0" data-f="emergency" value="${sub.emergency}" title="应急保障占比(%)"></div>`;
+  const tiers=genTiers(sub);
+  let prev=tiers.map((v,i)=>`${i+1}档:${v}`).join(" / ");
+  if(sub.isCustom){
+    const tierInputs=tiers.map((v,i)=>`${i+1}档<input type="number" step="0.5" min="0" max="100" data-f="tier_${i}" value="${v}" style="width:50px" title="第${i+1}档得分(0-100)">`).join("  ");
+    html+=`<div class="tiny" style="text-align:left">档位得分：${tierInputs}${sub.zeroTier?" / 零分档:0":""}</div>`;
+  }else{
+    html+=`<div class="tiny" style="text-align:left">${isPrice?"报价按K值自动落档":prev}${sub.zeroTier?" / 零分档:0":""}</div>`;
+  }
+  let ops=`<button class="danger sm" data-act="del">删</button>`;
+  row.innerHTML=html+`<div class="row" style="justify-content:flex-end">${ops}</div>`;
+  if(sub.cap){
+    const capRow=document.createElement("div");
+    capRow.style.gridColumn="1 / -1"; capRow.style.marginTop="-2px";
+    capRow.innerHTML=capFields(cat,sub);
+    row.appendChild(capRow);
+  }
+  return row;
+}
+function capFields(cat,sub){
+  const p=state.project;
+  if(sub.cap==="award"){
+    const natCap=p.qualityAbove?2:1, provCap=p.qualityAbove?3:2;
+    return `<span class="tiny">工程奖项上限：国家级满分≤<input type="number" data-f="natMax" value="${sub.natMax}" style="width:52px;display:inline" min="0"> 个（上限${natCap}）｜省级满分≤<input type="number" data-f="provMax" value="${sub.provMax}" style="width:52px;display:inline" min="0"> 个（上限${provCap}）｜含鲁班奖等9类国家级</span>`;
+  }
+  if(sub.cap==="perf"){
+    return `<span class="tiny">工程业绩上限：企业满分≤<input type="number" data-f="entMax" value="${sub.entMax}" style="width:52px;display:inline" min="0"> 个（上限2）｜个人满分≤<input type="number" data-f="perMax" value="${sub.perMax}" style="width:52px;display:inline" min="0"> 个（上限1）｜特征指标≤规模标准｜个人不设奖项业绩</span>`;
+  }
+  if(sub.cap==="qual"){
+    // 资格条件的资质等级可提高一级作为投标人的资质的满分档（数字编号 1=一级 2=二级 3=三级 4=特级，数字越小等级越高）
+    // 提高一级 = 资格等级数字减 1；该等级为满分档的【上限】（最高等级），只能往低调整（数字≥fixed），不得高于此上限
+    const fixed=Math.max(1,p.qualLevel-1);
+    const lvlName=lv=>lv===1?"一级":lv===2?"二级":lv===3?"三级":lv===4?"特级":lv+"级";
+    return `<span class="tiny">资质等级：满分档目标等级 <input type="number" data-f="targetLevel" value="${sub.targetLevel}" style="width:52px;display:inline" min="${fixed}" max="4" title="满分档上限锁死为「资格 ${lvlName(p.qualLevel)} 提高一级」即 ${lvlName(fixed)}，只能往低调整（数字≥${fixed}），不得高于该上限"> 级（资格 ${lvlName(p.qualLevel)} 提高一级作为满分档上限 = ${lvlName(fixed)}，仅可下调）</span>`;
+  }
+  if(sub.cap==="defense"){
+    return `<span class="tiny">陈述答辩权重≤10%；其中项目应急保障能力部分≤5%（左侧"应急保障占比"）。评分>满分90%或<50%须书面说明≥50字。</span>`;
+  }
+  if(sub.cap==="xiamen_credit"){
+    const cap=p.bidType==="监理"?0:10;
+    return `<span class="tiny">厦门信用：满分档评审标准≤A级基准分 +<input type="number" data-f="aPlus" value="${sub.aPlus}" style="width:48px;display:inline" min="0"> 分${p.bidType==="监理"?"（监理：上限为A级分值，即+0）":""}（上限+${cap}）</span>`;
+  }
+  if(sub.cap==="price"){
+    return `<span class="tiny">报价权重 20%–30%，最低档=满分档50%；档次由 K 值引擎自动生成。</span>`;
+  }
+  if(sub.cap==="comment"){
+    return `<span class="tiny">设计/勘察设计合并招标以设计方案优劣为主，建议本要素权重为最大项；评分>满分90%或<50%须书面说明理由≥50字（参照答辩条款精神）。</span>`;
+  }
+  return "";
+}
+function addCustom(cat){
+  const name=prompt("请输入自定义子要素名称（不得含：规模/注册地址/注册资金/市场占有率/负债率/净资产规模）：");
+  if(name==null) return;
+  const nm=name.trim();
+  if(!nm){alert("名称不能为空");return;}
+  for(const b of BAN){ if(nm.includes(b)){ alert("⚠ 附件1二 禁止将该类内容设为定标子要素："+b); return; } }
+  const sub=mkSub({key:"custom",name:nm,cap:null},{isCustom:true,weight:5});
+  sub.tiers=autoTiers(sub.tierCount);
+  state.elements[cat].subs.push(sub);
+  renderConfig(); renderBidders();
+}
+function bindConfigInputs(){
+  document.querySelectorAll("#configPanel [data-f]").forEach(inp=>{
+    inp.addEventListener("input",e=>{
+      const row=e.target.closest(".sub-row"); const id=row.dataset.id;
+      const sub=findSub(id); if(!sub) return;
+      const f=e.target.dataset.f; let v=e.target.value;
+      if(f.indexOf("tier_")===0){
+        v=parseFloat(v); if(isNaN(v)) v=0;
+        if(v<0)v=0; if(v>100)v=100;
+        if(!Array.isArray(sub.tiers)) sub.tiers=genTiers(sub);
+        sub.tiers[+f.slice(5)]=v;
+        updateLive(); return;
+      }
+      if(["weight","emergency","natMax","provMax","entMax","perMax","targetLevel","aPlus","tierCount"].includes(f)){
+        v=parseFloat(v); if(isNaN(v)) v=0;
+      }
+      sub[f]=v;
+      if(f==="tierCount"){
+        v=Math.round(v); if(isNaN(v)) v=5;
+        // 档位上限已放开（原限定 3–5 解除）：不再钳制 ≤5，超出 3–5 将在合规校验中以 warn 形式提示
+        if(v<2)v=2;
+        sub.tierCount=v;
+        // 非自定义档位数变化时按新档位数重算默认等差 tiers（覆盖旧的 5 档等差值）
+        resizeTiers(sub);
+        renderConfig(); renderBidders(); return;
+      }
+      updateLive();
+    });
+    inp.addEventListener("change",()=>{ renderBidders(); });
+  });
+  document.querySelectorAll("#configPanel [data-act='del']").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      const row=e.target.closest(".sub-row"); const id=row.dataset.id;
+      for(const cat of CATS){
+        const arr=state.elements[cat].subs; const i=arr.findIndex(s=>s.id===id);
+        if(i>=0){ arr.splice(i,1); break; }
+      }
+      renderConfig(); renderBidders();
+    });
+  });
+}
+function findSub(id){
+  for(const cat of CATS){ const s=state.elements[cat].subs.find(x=>x.id===id); if(s) return s; }
+  return null;
+}
+
+/* ============ 实时更新 + 校验 ============ */
+function updateLive(){
+  CATS.forEach(cat=>{ const e=$("ew_"+cat); if(e) e.textContent=fmt(elWeight(cat),1)+"%"; });
+  renderValidation();
+  updateScores();
+  renderKTable();
+  renderKScoreEditor();
+}
+function validate(){
+  const iss=[]; const p=state.project;
+  const wC=elWeight("信用"), wS=elWeight("实力"), wP=elWeight("报价"), wV=elWeight("评审意见");
+  const tot=wC+wS+wP+wV;
+  if(Math.abs(tot-100)>0.1) iss.push(["err",`四要素权重合计 ${fmt(tot,1)}% ≠ 100%（应精确为100%）`,"附件1"]);
+  if(!isDesign()){
+    if(wC<20||wC>30) iss.push(["err",`信用要素权重 ${fmt(wC,1)}% 超出 20%–30%`,`附件1 四(三)1${p.bidType==="监理"?"/五(一)":""}`]);
+    if(wS>50) iss.push(["err",`实力要素权重 ${fmt(wS,1)}% 超出 ≤50%`,"附件1 四(二)1"]);
+    if(wP<20||wP>30) iss.push(["err",`报价要素权重 ${fmt(wP,1)}% 超出 20%–30%`,"附件1 四(一)1"]);
+  }else{
+    if(wV<wC&&wV<wP&&wV<wS) iss.push(["warn",`设计/勘察设计合并：评审意见(设计方案)权重 ${fmt(wV,1)}% 非最大项，与"以设计方案优劣为主"精神不符`,"附件1 一"]);
+  }
+  const xm=state.elements.信用.subs.find(s=>s.cap==="xiamen_credit");
+  if(xm && p.industry==="房建市政" && p.hasXiamen){
+    if(xm.weight < wC/2 - 0.05) iss.push(["warn",`房建市政：厦门建设行业信用权重 ${fmt(xm.weight,1)}% 低于信用总权重一半(${fmt(wC/2,1)}%)（鼓励性，建议调整）`,"附件1 四(三)1/五(一)"]);
+  }
+  const ss=state.elements.实力.subs;
+  if(ss.length<3) iss.push(["err",`实力要素子要素仅 ${ss.length} 个，须 ≥3 个`,"附件1 四(二)1"]);
+  const ws=ss.map(s=>+s.weight||0).filter(x=>x>0);
+  if(ws.length>=2){
+    const mx=Math.max(...ws), mn=Math.min(...ws);
+    if(mx > 3*mn + 1e-6) iss.push(["err",`实力子要素权重最大 ${fmt(mx,1)}% 超过最小 ${fmt(mn,1)}% 的3倍`,"附件1 四(二)1"]);
+  }
+  const def=ss.find(s=>s.cap==="defense");
+  if(def){
+    if(def.weight>10) iss.push(["err",`陈述答辩权重 ${fmt(def.weight,1)}% 超过 ≤10%`,"附件1 四(二)1/三(一)"]);
+    if(def.emergency>5) iss.push(["err",`项目应急保障能力部分 ${fmt(def.emergency,1)}% 超过 ≤5%`,"附件1 四(二)1/三(一)"]);
+  }
+  const aw=ss.find(s=>s.cap==="award");
+  if(aw){
+    const natCap=p.qualityAbove?2:1, provCap=p.qualityAbove?3:2;
+    if(aw.natMax>natCap) iss.push(["err",`工程奖项国家级满分上限 ${aw.natMax} 超过 ${natCap}（省优以上为${natCap}）`,"附件1 四(二)2"]);
+    if(aw.provMax>provCap) iss.push(["err",`工程奖项省级满分上限 ${aw.provMax} 超过 ${provCap}（省优以上为${provCap}）`,"附件1 四(二)2"]);
+  }
+  const pf=ss.find(s=>s.cap==="perf");
+  if(pf){
+    if(pf.entMax>2) iss.push(["err",`工程业绩企业满分上限 ${pf.entMax} 超过 2`,"附件1 四(二)3"]);
+    if(pf.perMax>1) iss.push(["err",`工程业绩个人满分上限 ${pf.perMax} 超过 1`,"附件1 四(二)3"]);
+  }
+  const ql=ss.find(s=>s.cap==="qual");
+  if(ql){
+    // 资格条件的资质等级可提高一级作为投标人的资质的满分档（数字编号 1=一级 2=二级 3=三级 4=特级，数字越小等级越高）
+    // 提高一级 = 资格等级数字减 1；该等级为满分档的【上限】。满分档只能往低调整（数字 ≥ fixed），不得高于此上限
+    const fixed=Math.max(1,p.qualLevel-1);
+    const lvlName=lv=>lv===1?"一级":lv===2?"二级":lv===3?"三级":lv===4?"特级":lv+"级";
+    // 1) 数据合法性（必须为正整数 1-4）：阻断
+    if(!Number.isFinite(ql.targetLevel) || ql.targetLevel<1 || ql.targetLevel>4 || Math.round(ql.targetLevel)!==ql.targetLevel){
+      iss.push(["err",`资质等级目标 ${ql.targetLevel} 非法（须为 1–4 的整数：1=一级、2=二级、3=三级、4=特级）`,"附件1 四(二)4"]);
+    } else if(ql.targetLevel<fixed){
+      // 2) 高于"提高一级"上限（数字更小=等级更高）：阻断
+      iss.push(["err",`资质等级满分档 ${lvlName(ql.targetLevel)} 高于"资格 ${lvlName(p.qualLevel)} 提高一级"的上限 ${lvlName(fixed)}（满分档上限锁死为 ${lvlName(fixed)}，只能往低调整）`,"附件1 四(二)4"]);
+    }
+  }
+  if(xm){
+    const cap=p.bidType==="监理"?0:10;
+    if(xm.aPlus>cap) iss.push(["err",`厦门信用满分档 +${xm.aPlus} 分 超过上限 +${cap}（${p.bidType==="监理"?"监理≤A级分值":"施工≤A+10"}）`,p.bidType==="监理"?"附件1 五(二)":"附件1 四(三)3"]);
+  }
+  CATS.forEach(cat=>{
+    state.elements[cat].subs.forEach(s=>{
+      const tMin=s.zeroTier?2:3;
+      // 原限定 3–5 解除：档位数 < tMin 仍按 err 阻断（不合法），超出 >5 改为 warn 提示
+      if(!s.isCustom && s.tierCount<tMin) iss.push(["err",`子要素「${s.name}」档位数 ${s.tierCount} 低于最低 ${tMin}`,"附件1 四"]);
+      if(!s.isCustom && s.tierCount>5) iss.push(["warn",`子要素「${s.name}」档位数 ${s.tierCount} 高于建议值 5（附件1 推荐 3–5 档，请确认评审标准与档位梯度设置合理）`,"附件1 四"]);
+      const tiers=genTiers(s);
+      if(!s.zeroTier && Math.abs(tiers[tiers.length-1]-50)>0.5) iss.push(["err",`子要素「${s.name}」最低档 ${tiers[tiers.length-1]} ≠ 满分档50%`,"附件1 四"]);
+    });
+  });
+  CATS.forEach(cat=>{
+    state.elements[cat].subs.forEach(s=>{
+      if(s.isCustom){ for(const b of BAN){ if(s.name.includes(b)) iss.push(["err",`自定义子要素「${s.name}」含禁设内容「${b}」`,"附件1 二"]); } }
+    });
+  });
+  const k=state.k;
+  const span=+(k.kmax-k.kmin);
+  if(k.set){
+    if(span<2-1e-9||span>4+1e-9) iss.push(["err",`K 抽取幅度 ${fmt(span,2)}% 不在 2%–4%`,"附件1 四(一)4"]);
+    if(Math.abs(k.kmin*100-Math.round(k.kmin*100))>1e-9 || Math.abs(k.kmax*100-Math.round(k.kmax*100))>1e-9) iss.push(["warn",`K 区间未保留两位小数（须两位小数）`,"附件1 四(一)4"]);
+    if(k.step<1-1e-9) iss.push(["err",`K 档位步长 ${fmt(k.step,2)}% < 1%`,"附件1 四(一)4"]);
+    if(k.k<k.kmin||k.k>k.kmax) iss.push(["err",`当前 K=${fmt(k.k,2)}% 超出抽取区间`,"附件1 四(一)4"]);
+  }
+  if(iss.length===0) iss.push(["ok","✓ 当前配置满足附件1全部硬约束"]);
+  return iss;
+}
+function renderValidation(){
+  const box=$("validation"); const iss=validate();
+  box.innerHTML=iss.map(([lv,msg])=>`<div class="${lv}">${lv==="ok"?"":"• "}${msg}</div>`).join("");
+}
+
+/* ============ K 值引擎 ============ */
+/* 返回用于 K 值档次表显示的各档位得分：
+   - 若用户在 ③ 模块中编辑了各档得分（state.k.scoreOverrides），使用编辑值；
+   - 否则回退到原 genTiers(price) 的等差默认值。
+   不修改报价子要素的 tiers / isCustom 字段，因此 ② 模块的子要素结构、合规校验、得分链路均不变。 */
+function getKTiers(){
+  const price=state.elements.报价.subs[0];
+  const n=price?price.tierCount:5;
+  const def=genTiers(price||{tierCount:5,zeroTier:false});
+  const ov=state.k.scoreOverrides;
+  if(!Array.isArray(ov)) return {tiers:def, hasOverride:false, n:n};
+  const out=def.slice();
+  for(let i=0;i<out.length;i++){
+    const v=ov[i];
+    if(v==null || v==="" || isNaN(+v)) continue;
+    out[i]=Math.max(0,Math.min(100,+v));
+  }
+  return {tiers:out, hasOverride:true, n:n};
+}
+function ensureScoreOverridesLength(n){
+  if(!Array.isArray(state.k.scoreOverrides)) state.k.scoreOverrides=[];
+  while(state.k.scoreOverrides.length<n) state.k.scoreOverrides.push(null);
+  while(state.k.scoreOverrides.length>n) state.k.scoreOverrides.pop();
+}
+function renderKScoreEditor(){
+  const box=$("kScoreEditor"); if(!box) return;
+  const price=state.elements.报价.subs[0];
+  const n=price?price.tierCount:5;
+  const zero=price?price.zeroTier:false;
+  ensureScoreOverridesLength(n);
+  const def=genTiers(price||{tierCount:5,zeroTier:false});
+  const ov=state.k.scoreOverrides;
+  let html="";
+  for(let i=0;i<n;i++){
+    const cur=ov[i];
+    const disp=(cur==null||cur==="")? "" : cur;
+    const ph=def[i].toFixed(1);
+    html+=`<div style="width:96px"><label>${i+1}档得分${i===0?"(满分)":""}</label>`+
+      `<input type="number" step="0.5" min="0" max="100" data-kse="${i}" value="${disp}" placeholder="${ph}" title="留空使用默认 ${ph}"></div>`;
+  }
+  if(zero) html+=`<div style="width:96px"><label>零分档</label><input type="text" value="0" disabled></div>`;
+  box.innerHTML=html;
+  box.querySelectorAll("[data-kse]").forEach(inp=>{
+    inp.addEventListener("input",e=>{
+      const i=+e.target.dataset.kse;
+      ensureScoreOverridesLength(n);
+      const v=e.target.value;
+      if(v==="" || v==null){ state.k.scoreOverrides[i]=null; }
+      else { let num=parseFloat(v); if(isNaN(num)){ state.k.scoreOverrides[i]=null; }
+             else { num=Math.max(0,Math.min(100,num)); state.k.scoreOverrides[i]=num; } }
+      renderKTable();
+    });
+  });
+}
+function resetKScores(){
+  state.k.scoreOverrides=null;
+  renderKScoreEditor();
+  renderKTable();
+  $("kScoreNote").textContent="已重置为默认得分（等差，满分档 100，最低档 = 满分档 50%）。";
+}
+function readK(){
+  state.k.kmin=+$("kmin").value; state.k.kmax=+$("kmax").value;
+  state.k.step=+$("kstep").value; state.k.k=+$("kval").value; state.k.set=true;
+  renderKTable(); updateLive();
+}
+function drawK(){
+  const lo=+$("kmin").value, hi=+$("kmax").value;
+  if(hi<=lo){ alert("区间上限须大于下限"); return; }
+  const r=Math.random()*(hi-lo)+lo; const k=Math.round(r*100)/100;
+  $("kval").value=fmt(k,2); readK();
+  $("kStatus").textContent=`已模拟抽取 K = ${fmt(k,2)}%（区间内随机，两位小数）`;
+}
+function renderKTable(){
+  const k=state.k; const t=$("kTable");
+  if(!k.set){ t.innerHTML=""; return; }
+  const price=state.elements.报价.subs[0];
+  const n=price?price.tierCount:5, zero=price?price.zeroTier:false;
+  const iv=priceIntervals(k.k,k.step,n,zero);
+  const {tiers}=getKTiers();
+  let html=`<thead><tr><th>档位</th><th>得分</th><th>下浮率区间(%)</th><th>说明</th></tr></thead><tbody>`;
+  iv.forEach(v=>{
+    const score = (v.tier===n+1)?0:tiers[v.tier-1];
+    const rng = v.zero? "—（无奖项/业绩/未答辩）" : `${fmt(v.lo,2)}（含） ~ ${fmt(v.hi,2)}（不含）`;
+    html+=`<tr><td>${v.tier===n+1?"零分档":v.tier+"档"}</td><td>${score}</td><td>${rng}</td><td class="l">${v.txt}</td></tr>`;
+  });
+  html+=`</tbody>`; t.innerHTML=html;
+}
+
+/* ============ 投标人 ============ */
+function newBidder(name){
+  const tiers={};
+  CATS.forEach(cat=>state.elements[cat].subs.forEach(s=>{ if(s.cap!=="price") tiers[s.id]=1; }));
+  return {name:name||"投标人"+(state.bidders.length+1), union:false, recommend:true, d: state.k.k, tiers,
+          unionCredit:null, unionStrength:null};
+}
+function renderBidders(){
+  const t=$("bidderTable");
+  const subs=allSubs().filter(s=>s.cap!=="price");
+  let html=`<thead><tr><th>投标人</th><th>联合体</th><th>评标推荐</th><th>下浮率%<br><span class="tiny">(报价用)</span></th>`;
+  subs.forEach(s=>html+=`<th>${s.name}<br><span class="tiny">选档</span></th>`);
+  html+=`<th>综合得分</th></tr></thead><tbody>`;
+  state.bidders.forEach((b,i)=>{
+    html+=`<tr data-bi="${i}">`;
+    html+=`<td class="l"><input type="text" data-b="name" value="${b.name}" style="width:120px"></td>`;
+    html+=`<td><input type="checkbox" data-b="union" ${b.union?"checked":""}></td>`;
+    html+=`<td><input type="checkbox" data-b="recommend" ${b.recommend?"checked":""}></td>`;
+    html+=`<td><input type="number" step="0.01" data-b="d" value="${fmt(b.d,2)}" style="width:78px"></td>`;
+    subs.forEach(s=>{
+      let cell=`<select data-b="tier" data-sid="${s.id}">`;
+      const n=s.tierCount;
+      for(let ti=1;ti<=n;ti++) cell+=`<option value="${ti}" ${b.tiers[s.id]===ti?"selected":""}>${ti}档(${scoreForTier(s,ti)})</option>`;
+      if(s.zeroTier) cell+=`<option value="${n+1}" ${b.tiers[s.id]===n+1?"selected":""}>零分档(0)</option>`;
+      cell+=`</select>`;
+      html+=`<td>${cell}</td>`;
+    });
+    html+=`<td id="comp_${i}"><b>—</b></td></tr>`;
+    if(b.union){
+      html+=`<tr data-bi="${i}" class="tiny"><td colspan="4" style="text-align:left;background:#fafbfc">↳ 联合体：另方信用得分 <input type="number" step="0.1" data-b="unionCredit" value="${b.unionCredit!=null?b.unionCredit:""}" style="width:64px"> ｜ 另方实力得分 <input type="number" step="0.1" data-b="unionStrength" value="${b.unionStrength!=null?b.unionStrength:""}" style="width:64px"> （信用/实力取较高一方认定，附件1四(四)）</td><td colspan="${subs.length+1}" style="background:#fafbfc"></td></tr>`;
+    }
+  });
+  html+=`</tbody>`; t.innerHTML=html;
+  bindBidderInputs();
+  updateScores();
+}
+function allSubs(){ const a=[]; CATS.forEach(c=>a.push(...state.elements[c].subs)); return a; }
+function bindBidderInputs(){
+  document.querySelectorAll("#bidderTable [data-b]").forEach(inp=>{
+    inp.addEventListener("input",e=>{
+      const tr=e.target.closest("tr"); if(!tr.dataset.bi && tr.dataset.bi!=="0") return;
+      const i=+tr.dataset.bi; const b=state.bidders[i]; if(!b) return;
+      const f=e.target.dataset.b;
+      if(f==="name") b.name=e.target.value;
+      else if(f==="union"){ b.union=e.target.checked; renderBidders(); return; }
+      else if(f==="recommend") b.recommend=e.target.checked;
+      else if(f==="d") b.d=parseFloat(e.target.value)||0;
+      else if(f==="tier") b.tiers[e.target.dataset.sid]=+e.target.value;
+      else if(f==="unionCredit") b.unionCredit=e.target.value===""?null:(+e.target.value);
+      else if(f==="unionStrength") b.unionStrength=e.target.value===""?null:(+e.target.value);
+      updateScores();
+    });
+  });
+}
+function bidderScore(b){
+  let total=0; const det={}; const flags=[];
+  CATS.forEach(cat=>{
+    state.elements[cat].subs.forEach(sub=>{
+      let s;
+      if(sub.cap==="price"){
+        if(!state.k.set){ s=0; }
+        else { const t=priceTier(b.d,state.k.k,state.k.step,sub.tierCount,sub.zeroTier); s=scoreForTier(sub,t); }
+      }else{
+        const ti=b.tiers[sub.id]||1; s=scoreForTier(sub,ti);
+      }
+      const contrib = s*(+sub.weight||0)/100;
+      total+=contrib; det[sub.id]={score:s,contrib,weight:sub.weight,name:sub.name,cap:sub.cap,cat:cat};
+      if(sub.cap==="defense" && (s>90 || s<50)) flags.push("陈述答辩评分"+fmt(s,0)+"%需书面说明≥50字");
+      if(sub.cap==="comment" && (s>90 || s<50)) flags.push("评审意见评分"+fmt(s,0)+"%建议书面说明理由≥50字");
+    });
+  });
+  // 联合体取较高一方（信用/实力，附件1四(四)）
+  if(b.union){
+    const wC=elWeight("信用"), wS=elWeight("实力");
+    if(b.unionCredit!=null){
+      const ownC=CATS.reduce((acc,cat)=>cat==="信用"?acc:acc,0);
+      let ownCredit=0;
+      state.elements.信用.subs.forEach(sub=>{ const d=det[sub.id]; if(d) ownCredit+=d.contrib; });
+      total = total - ownCredit + Math.max(ownCredit, b.unionCredit*wC/100);
+    }
+    if(b.unionStrength!=null){
+      let ownStrength=0;
+      state.elements.实力.subs.forEach(sub=>{ const d=det[sub.id]; if(d) ownStrength+=d.contrib; });
+      total = total - ownStrength + Math.max(ownStrength, b.unionStrength*wS/100);
+    }
+  }
+  return {total,det,flags};
+}
+function updateScores(){
+  const ranked=[];
+  state.bidders.forEach((b,i)=>{
+    if(!b.recommend){ return; }
+    const r=bidderScore(b);
+    ranked.push({i,name:b.name,b,total:r.total,det:r.det,flags:r.flags});
+  });
+  ranked.sort((a,b)=> b.total-a.total || b.b.d-a.b.d);
+  state.bidders.forEach((b,i)=>{ const c=$("comp_"+i); if(c) c.innerHTML="<b>—</b>"; });
+  ranked.forEach(r=>{
+    const c=$("comp_"+r.i); if(c) c.innerHTML=`<b>${fmt(r.total,2)}</b>${r.flags.length?`<br><span class="pill red">${r.flags[0]}</span>`:""}`;
+  });
+  renderRanking(ranked);
+  renderChart(ranked);
+}
+function renderRanking(ranked){
+  const box=$("ranking"); if(!ranked.length){ box.innerHTML="<div class='note'>尚未添加投标人或未推荐者。</div>"; return; }
+  let html=`<table><thead><tr><th>排名</th><th>投标人</th><th>综合得分</th><th>下浮率%</th><th>评标推荐</th></tr></thead><tbody>`;
+  ranked.forEach((r,idx)=>{
+    html+=`<tr><td><b>${idx+1}</b></td><td class="l">${r.name}</td><td><b>${fmt(r.total,2)}</b></td><td>${fmt(r.b.d,2)}</td><td>${r.b.recommend?"是":"否(排除)"}</td></tr>`;
+  });
+  html+=`</tbody></table>`; box.innerHTML=html;
+}
+function renderChart(ranked){
+  const box=$("chart"); if(!ranked.length){ box.innerHTML=""; return; }
+  const W=680, rowH=26, padL=10, padR=10, barW=W-padL-padR, labelW=78;
+  const H=ranked.length*rowH+30; const maxScore=100;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,PingFang SC,Microsoft YaHei,sans-serif">`;
+  svg+=`<text x="10" y="16" font-size="12" fill="#6b7280">得分构成（堆叠，按要素贡献，单位：综合得分）</text>`;
+  ranked.forEach((r,ri)=>{
+    const y=24+ri*rowH; let x=padL+labelW; const scale=(barW-labelW)/maxScore;
+    svg+=`<text x="10" y="${y+rowH/2+4}" font-size="11" fill="#1f2937">${r.name}</text>`;
+    let cx=x;
+    CATS.forEach(cat=>{
+      let contrib=0;
+      state.elements[cat].subs.forEach(sub=>{ const d=r.det[sub.id]; if(d) contrib+=d.contrib; });
+      const w=contrib*scale;
+      if(w>0.4){
+        svg+=`<rect x="${cx}" y="${y+4}" width="${w}" height="${rowH-10}" rx="2" fill="${COLORS[cat]}" opacity="0.85"><title>${cat}: ${fmt(contrib,2)}</title></rect>`;
+        if(w>20) svg+=`<text x="${cx+w/2}" y="${y+rowH/2+3}" font-size="9" fill="#fff" text-anchor="middle">${fmt(contrib,2)}</text>`;
+        cx+=w;
+      }
+    });
+    svg+=`<text x="${W-padR}" y="${y+rowH/2+4}" font-size="11" fill="#1f2937" text-anchor="end">${fmt(r.total,2)}</text>`;
+  });
+  svg+=`</svg>`; box.innerHTML=svg;
+}
+
+/* ============ 敏感性 ============ */
+function runSensitivity(){
+  const from=$("sensFrom").value, to=$("sensTo").value, delta=+$("sens").value;
+  if(from===to){ $("sensLabel").textContent=`调整幅度：${delta}%`; $("sensOut").textContent="请选择不同的两个要素。"; return; }
+  $("sensLabel").textContent=`调整幅度：${delta}%（从 ${from} → ${to}）`;
+  const base=baseRanking();
+  const wFrom=elWeight(from), wTo=elWeight(to);
+  const newFrom=Math.max(0,wFrom+delta), newTo=Math.max(0,wTo-delta);
+  scaleSubs(from,newFrom); scaleSubs(to,newTo);
+  const after=baseRanking();
+  scaleSubs(from,wFrom); scaleSubs(to,wTo); updateScores();
+  const beforeNames=base.map(r=>r.name).join(" > ");
+  const afterNames=after.map(r=>r.name).join(" > ");
+  const flipped = beforeNames!==afterNames;
+  $("sensOut").innerHTML = `基准排名：${beforeNames}<br>调整后排名：${afterNames}`+
+    (flipped?`<br><span class="pill red">⚠ 排名发生翻转</span>`:`<br><span class="pill green">排名未变</span>`);
+}
+function scaleSubs(cat,target){
+  const subs=state.elements[cat].subs; const cur=elWeight(cat); if(cur<=0){ return; }
+  subs.forEach(s=>{ s.weight = Math.round(s.weight/cur*target*10)/10; });
+}
+function baseRanking(){
+  const arr=[];
+  state.bidders.forEach((b,i)=>{ if(!b.recommend) return; const r=bidderScore(b); arr.push({name:b.name,total:r.total,d:b.d}); });
+  arr.sort((a,b)=>b.total-a.total||b.d-a.d); return arr;
+}
+
+/* ============ 定标方法 ============ */
+function runMethod(){
+  const meth=document.querySelector('input[name=meth]:checked').value;
+  const rec=state.bidders.filter(b=>b.recommend);
+  if(rec.length===0){ $("methodResult").innerHTML="<span class='pill red'>无被评标委员会推荐的投标人</span>"; return; }
+  const candN = rec.length>=20?5:3;
+  const scored=rec.map(b=>{ const r=bidderScore(b); return {b,total:r.total,d:b.d}; });
+  let html="";
+  if(meth==="高分低价法"){
+    scored.sort((a,b)=>b.total-a.total||b.d-a.d);
+    const cands=scored.slice(0,Math.min(candN,scored.length));
+    const win=cands.reduce((m,x)=> x.d>m.d?x:m, cands[0]);
+    html=`<div>定标候选人（评标推荐）${rec.length} 家 → 中标候选人（综合得分前 ${cands.length}）：${cands.map(x=>x.b.name+"("+fmt(x.total,2)+")").join("、")}</div>
+      <div class="winner">中标人（候选中报价最低/下浮率最高）：${win.b.name}（下浮率 ${fmt(win.d,2)}%）</div>`;
+  }else if(meth==="高分随机法"){
+    scored.sort((a,b)=>b.total-a.total||b.d-a.d);
+    const cands=scored.slice(0,Math.min(candN,scored.length));
+    const win=cands[Math.floor(Math.random()*cands.length)];
+    html=`<div>中标候选人（综合得分前 ${cands.length}）：${cands.map(x=>x.b.name+"("+fmt(x.total,2)+")").join("、")}</div>
+      <div class="winner">随机抽中中标人：${win.b.name}</div>`;
+  }else if(meth==="低价随机法"){
+    const sorted=[...scored].sort((a,b)=>b.total-a.total);
+    const rangeN=Math.max(3,Math.round(sorted.length*0.3));
+    let range=sorted.slice(0,rangeN);
+    const lastScore=range[range.length-1].total;
+    sorted.forEach(x=>{ if(x.total===lastScore && !range.includes(x)) range.push(x); });
+    // 评审报价
+    const p=state.project; const xm=state.elements.信用.subs.find(s=>s.cap==="xiamen_credit");
+    const rpRng=+p.discountPm||4; const delta=rpRng/1000;
+    const maxPrice=p.maxPrice>0?p.maxPrice:10000;
+    range.forEach(x=>{
+      let rpD=x.d;
+      if(p.bidType==="施工" && p.industry==="房建市政"){
+        const rs=bidderScore(x.b);
+        const xmScore=xm?rs.det[xm.id]?rs.det[xm.id].score:0:0;
+        if(xmScore>=50) rpD = x.d + delta; // 信用靠前：报价额外下浮3‰–5‰
+      }
+      x.rpD=rpD;
+      x.rpPrice=maxPrice*(1-x.d/100)*(x.rpD!==x.d?(1-delta):1);
+    });
+    range.sort((a,b)=>a.rpPrice-b.rpPrice);
+    const candN2=Math.min(range.length, candN);
+    const cands=range.slice(0,candN2);
+    const win=cands[Math.floor(Math.random()*cands.length)];
+    html=`<div>定标范围（综合得分前30%且≥3，同分并入）：${range.map(x=>x.b.name+"("+fmt(x.total,2)+")").join("、")}</div>
+      <div>评审报价最低 ${cands.length} 家为中标候选人：${cands.map(x=>x.b.name+"(评审下浮"+fmt(x.rpD,2)+"%)").join("、")}</div>
+      <div class="winner">随机抽中中标人：${win.b.name}</div>`;
+  }else if(meth==="直接票决法"){
+    if(!isDesign()){ $("methodResult").innerHTML="<span class='pill red'>直接票决法仅勘察设计合并/设计招标可用。</span>"; return; }
+    html=voteSimulate(rec, +$("dingN").value||7);
+  }
+  $("methodResult").innerHTML=html;
+  renderPublic();
+}
+function voteSimulate(rec,n){
+  let pool=[...rec], round=0, winner=null, log=[];
+  while(!winner && pool.length>0 && round<30){
+    round++;
+    const scores=pool.map(b=>bidderScore(b).total);
+    const totalScore=scores.reduce((a,b)=>a+b,0);
+    const votes={};
+    pool.forEach(b=>votes[b.name]=0);
+    for(let m=0;m<n;m++){
+      let r=Math.random()*totalScore, acc=0, pick=0;
+      for(let i=0;i<pool.length;i++){ acc+=scores[i]; if(r<acc){ pick=i; break; } }
+      votes[pool[pick].name]++;
+    }
+    const entries=Object.entries(votes).sort((a,b)=>b[1]-a[1]);
+    const topVotes=entries[0][1];
+    const half=n/2;
+    let line=`第${round}轮（${pool.length}家，${n}票）：${entries.map(e=>e[0]+" "+e[1]+"票").join("、")}。`;
+    if(topVotes>half){
+      winner=entries[0][0]; line+=` 得票超半数（>${half}）→ 中标：${winner}`;
+    }else{
+      const secondVotes=entries.length>1?entries[1][1]:0;
+      const next=entries.filter(e=>e[1]>=secondVotes).map(e=>e[0]);
+      line+=` 未超半数，进入下一轮：${next.join("、")}`;
+      pool=pool.filter(b=>next.includes(b.name));
+    }
+    log.push(line);
+    if(pool.length===1 && !winner){ winner=pool[0].name; }
+  }
+  let html=`<div>直接票决法（定标委员会 ${n} 人，每人1票，得票超半数即中标）：</div>`;
+  log.forEach(l=>html+=`<div class="tiny">${l}</div>`);
+  html+=`<div class="winner">中标人：${winner||"—"}</div>`;
+  return html;
+}
+
+/* ============ 附件5 参照表 ============ */
+const APPENDIX5 = [
+  ["施工总承包","建筑工程","高度100米以上的工业建筑工程"],
+  ["施工总承包","建筑工程","高度100米以上的民用建筑工程"],
+  ["施工总承包","建筑工程","高度120米以上的构筑物工程"],
+  ["施工总承包","建筑工程","单跨跨度30米以上的建筑工程"],
+  ["施工总承包","建筑工程","地下二层及以上的大型地下建筑工程（含房屋建筑工程的地下室工程）"],
+  ["施工总承包","建筑工程","单体建筑面积3000平方米以上的装配式混凝土建筑工程"],
+  ["施工总承包","建筑工程","总建筑面积10万平方米以上或实际造价3亿元以上或单体建筑面积4万平方米以上的工业建筑工程"],
+  ["施工总承包","建筑工程","总建筑面积10万平方米以上或实际造价3亿元以上或单体建筑面积4万平方米以上的民用建筑工程"],
+  ["施工总承包","建筑工程","总建筑面积10万平方米以上或实际造价3亿元以上或单体建筑面积4万平方米以上的医疗、文化、教育、体育场馆、仓储工程"],
+  ["施工总承包","市政公用工程","单跨跨度45米以上或长度100米以上的城市桥梁工程"],
+  ["施工总承包","市政公用工程","断面25平方米以上或长度100米以上的隧道工程（地下交通工程）"],
+  ["施工总承包","市政公用工程","15万吨/日以上的净水厂"],
+  ["施工总承包","市政公用工程","10万吨/日以上污水处理厂"],
+  ["施工总承包","市政公用工程","中压以上燃气管道、调压站"],
+  ["施工总承包","市政公用工程","1000吨/日以上的垃圾处理厂（场）"],
+  ["施工总承包","市政公用工程","实际造价3000万元以上市政排水管道工程"],
+  ["施工总承包","市政公用工程","实际造价5000万元以上市政综合工程"],
+  ["施工总承包","市政公用工程","单舱截面面积10平方米以上或多舱（含双舱）截面面积18平方米以上或长度1000米以上综合管廊工程"],
+  ["专业承包","电子与智能化工程","实际造价3000万元以上的电子系统工程和建筑智能化工程"],
+  ["专业承包","消防设施工程","单体建筑面积6万平方米以上的工业建筑工程或单体建筑面积6万平方米以上的一类高层民用建筑工程或实际造价3000万元以上的消防设施工程"],
+  ["专业承包","钢结构工程","短向跨度（或直径）90米以上的网壳、网架结构"],
+  ["专业承包","建筑装修装饰工程","单体公共建筑装修面积2万平方米以上或实际造价3000万元以上的公共建筑或住宅装修工程"],
+  ["专业承包","建筑幕墙工程","单体建筑工程幕墙面积1.5万平方米以上的建筑幕墙工程"],
+  ["专业承包","地基基础工程","开挖深度15米以上的基坑围护工程或实际造价2000万元以上的地基基础工程"],
+  ["专业承包","建筑机电安装工程","实际造价3000万元以上的建筑机电安装工程"],
+  ["专业承包","城市及道路照明工程","实际造价1200万元以上的城市及道路照明工程"],
+];
+function renderAppendix5(){
+  let html=`<thead><tr><th>承包方式</th><th>工程类别</th><th class="l">工程特征指标</th></tr></thead><tbody>`;
+  APPENDIX5.forEach(r=>html+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="l">${r[2]}</td></tr>`);
+  html+=`</tbody>`; $("appendix5Table").innerHTML=html;
+}
+
+/* ============ 入围确定（附件4） ============ */
+function panelOf(pkey){ return state.panels[pkey]; }
+function genPanelBidders(pkey){
+  const P=PANELS.find(x=>x.key===pkey);
+  const id="slN_"+pkey;
+  const N=Math.min(Math.max(Math.round(+$(id).value||P.def),P.min),P.max);
+  $(id).value=N;
+  const dlo=+$("slDlo").value||4, dhi=+$("slDhi").value||12;
+  const mode=$("slSeed").value;
+  const seed=Math.max(0,Math.round(+$("slSeedVal").value||0));
+  state.project.slSeedMode=mode;
+  state.project.slSeedVal=seed;
+  let arr;
+  if(mode==="1"){
+    arr=seededBidders(N,dlo,dhi,seed);
+    arr=seededShuffle(arr,mulberry(seed));
+  } else {
+    arr=[]; for(let i=1;i<=N;i++){ arr.push({name:"投标人"+i, d:Math.round((dlo+Math.random()*(dhi-dlo))*100)/100, creditRank:i}); }
+    arr=shuffle(arr);
+  }
+  arr.forEach((b,i)=>b.creditRank=i+1);
+  const s=panelOf(pkey);
+  s.shortlist=arr;
+  s.lastShortlist=null;
+  s.shortlistSort=null;
+  s.shortlistStep=null;
+  renderPanelTable(pkey,null);
+}
+function creditAdvancedSet(bidders, ratioPct){
+  const n=bidders.length;
+  const k=Math.max(1,Math.min(n,Math.round(n*(ratioPct||30)/100)));
+  const sorted=[...bidders].sort((a,b)=>a.creditRank-b.creditRank);
+  return new Set(sorted.slice(0,k));
+}
+function calcShortlist(bidders){
+  const p=state.project; const N=bidders.length;
+  const clone=bidders.map(b=>({...b, in:false, reason:""}));
+  const steps=[];
+  const snap=()=>{ const m={}; clone.forEach(b=>{ if(b.reason) m[b.name]={in:b.in,reason:b.reason}; }); return m; };
+  const addStep=(t,d,f)=>{ steps.push({title:t,desc:d,mark:snap(),final:!!f}); };
+  if(p.bidType==="设计"||p.bidType==="勘察设计合并"||p.bidType==="勘察"){
+    clone.forEach(b=>{ b.in=true; b.reason="符合资格条件即入围"; });
+    addStep("资格审查","勘察/设计/勘察设计合并：符合资格条件的投标人均为入围投标人（设计招标原则上资格后审，附件4一）。",true);
+    return {list:clone, detail:steps[0].desc, steps};
+  }
+  if(p.bidType==="监理"){
+    if(N<=15){ clone.forEach(b=>{ b.in=true; b.reason="≤15家全入围"; }); addStep("确定入围",`监理：投标人${N}家 ≤15家，全部入围（附件4二(一)1）。`,true); return {list:clone, detail:steps[0].desc, steps}; }
+    const byCredit=[...clone].sort((a,b)=>a.creditRank-b.creditRank);
+    const pool=byCredit.slice(0,Math.min(byCredit.length,30));
+    const picked=(state.project.slSeedMode==="1"?seededShuffle(pool,mulberry(state.project.slSeedVal)):shuffle(pool)).slice(0,15);
+    byCredit.forEach(b=>{ if(picked.includes(b)){ b.in=true; b.reason="信用靠前随机抽中"; } else { b.in=false; b.reason="未抽中/未在信用靠前池"; } });
+    addStep("确定入围",`监理：投标人${N}家 >15家，从信用评价靠前池随机抽取15家入围（附件4二(一)2）。`,true);
+    return {list:clone, detail:steps[0].desc, steps};
+  }
+  // 施工
+  if(N<3){ return {list:clone, detail:`施工：投标人仅${N}家 <3家，招标人重新招标（附件4三(二)1）。`, steps:[]}; }
+  const byPriceAsc=[...clone].sort((a,b)=>b.d-a.d); // 下浮率高=报价低，在前
+  const markElim=(list,reason)=>{ list.forEach(b=>{ b.in=false; b.reason=reason; }); };
+  let detail="";
+  if(N>=3&&N<=20){
+    const worst=byPriceAsc[byPriceAsc.length-1].d;
+    const elim=byPriceAsc.filter(b=>b.d===worst);
+    markElim(elim,`报价最高（下浮${worst}%）淘汰`);
+    addStep("①报价排序淘汰",`按报价由低到高排序，淘汰报价最高1家（同最高价${elim.length}家一并淘汰），剩余${N-elim.length}家（附件4三(二)2）。`);
+    byPriceAsc.forEach(b=>{ if(b.d!==worst){ b.in=true; b.reason="入围（报价排序）"; } });
+    addStep("②确定入围","剩余投标人全部入围。",true);
+    detail=`施工：投标人${N}家（3–20家），按报价由低到高排序，淘汰报价最高1家（同最高价${elim.length}家一并淘汰），剩余${N-elim.length}家入围（附件4三(二)2）。`;
+  }else if(N>=21&&N<=30){
+    const k=Math.min(Math.max(Math.round(state.project.r21K||1),1),3);
+    const low=byPriceAsc.slice(0,k);
+    const high=byPriceAsc.slice(-k);
+    markElim([...low,...high],`报价靠前/靠后各${k}家淘汰`);
+    addStep("①报价排序淘汰",`按选择淘汰报价靠前和靠后各${k}家，剩余${N-2*k}家（附件4三(二)3）。`);
+    byPriceAsc.forEach(b=>{ if(!low.includes(b)&&!high.includes(b)){ b.in=true; b.reason="入围（报价排序）"; } });
+    addStep("②确定入围","剩余投标人全部入围。",true);
+    detail=`施工：投标人${N}家（21–30家），按选择淘汰报价靠前和靠后各${k}家，剩余${N-2*k}家入围（附件4三(二)3）。`;
+  }else if(N>=31&&N<=50){
+    let cutF=Math.max(5,Math.round(N*0.10));
+    const rem=byPriceAsc.slice(cutF);
+    let cutB=Math.round(rem.length*0.25);
+    const listRaw=rem.slice(0,rem.length-cutB);
+    const eliminated=byPriceAsc.filter(b=>!listRaw.includes(b));
+    markElim(eliminated,`报价排序淘汰（靠前${cutF}家/靠后${cutB}家）`);
+    const maxPrice=p.maxPrice>0?p.maxPrice:10000;
+    const priceOf=b=>maxPrice*(1-b.d/100);
+    detail=`施工：投标人${N}家（31–50家），报价排序淘汰靠前${cutF}家、靠后${cutB}家，余${listRaw.length}家；`;
+    addStep("①报价排序淘汰",`报价由低到高排序，淘汰靠前${cutF}家、靠后${cutB}家，余${listRaw.length}家；`);
+    if(listRaw.length>20){
+      const byCreditPrice=[...listRaw].sort((a,b)=>a.creditRank-b.creditRank||b.d-a.d);
+      const top20=byCreditPrice.slice(0,20);
+      listRaw.forEach(b=>{ if(!top20.includes(b)){ b.in=false; b.reason="信用排序未入前20"; } });
+      top20.forEach(b=>{ b.in=true; b.reason="信用靠前+低价优先取前20"; });
+      detail+=`余${listRaw.length}家>20家，按信用靠前+低价优先取20家入围；`;
+      addStep("②信用排序淘汰",`余${listRaw.length}家>20家，按信用靠前+低价优先取20家入围；`);
+    }else{
+      listRaw.forEach(b=>{ b.in=true; b.reason="入围（报价排序）"; });
+      detail+=`余${listRaw.length}家≤20家，全部入围；`;
+      addStep("②确定入围",`余${listRaw.length}家≤20家，全部入围；`);
+    }
+    // 增补规则（附件4三(二)4(2)①②）
+    let toAdd=0;
+    const inList=clone.filter(b=>b.in);
+    const fP=inList.map(priceOf);
+    const fMax=Math.max(...fP);
+    if(fP.length>=2 && (fMax-Math.min(...fP))/maxPrice*100 < 1-1e-9) toAdd += Math.max(0,inList.length-1);
+    const fSort=[...inList].sort((a,b)=>priceOf(a)-priceOf(b));
+    for(let i=0;i<fSort.length-1;i++) if((priceOf(fSort[i+1])-priceOf(fSort[i]))/maxPrice*100 < 0.1-1e-9) toAdd += 1;
+    // 信用靠前集（按比例定义）
+    const adv=creditAdvancedSet(clone,p.creditRatio);
+    const detailAdd=[];
+    // 房建市政：信用靠前折价一并入围（三(二)4(3)①，被报价排序淘汰除外）
+    if(p.industry==="房建市政"){
+      const disc=p.entryDisc/100;
+      let addDisc=0;
+      listRaw.forEach(b=>{
+        if(b.in||!adv.has(b)) return;
+        if(priceOf(b)*(1-disc) < fMax){ b.in=true; b.reason=`信用靠前折价${p.entryDisc}%后低于入围最高报价，一并入围`; addDisc++; }
+      });
+      if(addDisc>0) detailAdd.push(`房建市政：信用靠前折价${p.entryDisc}%一并入围${addDisc}家`);
+    }
+    // 信用补足（三(二)4(3)② 房建市政补足10家 / (4) 公路水运水利补足5家）
+    const advCap=p.industry==="房建市政"?10:5;
+    const inAdv=clone.filter(b=>b.in&&adv.has(b)).length;
+    if(inAdv<advCap){
+      const need=advCap-inAdv;
+      const cands=clone.filter(b=>!b.in&&adv.has(b)&&!eliminated.includes(b)).sort((a,b)=>b.d-a.d);
+      let add=0;
+      cands.forEach(b=>{ if(add<need){ b.in=true; b.reason=`信用靠前按低价优先补足${advCap}家`; add++; } });
+      if(add>0) detailAdd.push(`${p.industry==="房建市政"?"房建市政":"公路/水运/水利"}：信用靠前补足${advCap}家（实补${add}家）`);
+    }
+    // 增补执行：按信用排序从未被报价排序淘汰且未入围中补（三(二)4(2)①②）
+    if(toAdd>0){
+      const cands=listRaw.filter(b=>!b.in).sort((a,b)=>a.creditRank-b.creditRank||b.d-a.d);
+      let add=0;
+      cands.forEach(b=>{ if(add<toAdd){ b.in=true; b.reason="增补规则（报价集中/相邻价差过小）按信用排序增补"; add++; } });
+      detailAdd.push(`增补规则①②：${toAdd}个名额，实增${add}家`);
+    }
+    if(detailAdd.length) detail+=detailAdd.join("；")+"。";
+    else detail+="无增补/折价/补足情形。";
+    addStep("③增补入围调整",detailAdd.length?detailAdd.join("；")+"。":"无增补/折价/补足情形。",true);
+  }else{
+    let cutF=Math.max(5,Math.round(N*0.10));
+    const rem=byPriceAsc.slice(cutF);
+    let cutB=Math.min(30,Math.round(rem.length*0.25));
+    const listRaw=rem.slice(0,rem.length-cutB);
+    const eliminated=byPriceAsc.filter(b=>!listRaw.includes(b));
+    markElim(eliminated,`报价排序淘汰（靠前${cutF}家/靠后${cutB}家）`);
+    addStep("①报价排序淘汰",`报价由低到高排序，淘汰靠前${cutF}家、靠后${cutB}家，余${listRaw.length}家；`);
+    const n=listRaw.length;
+    let split=Math.floor(n/2);
+    if(split>0 && split<n && listRaw[split-1].d===listRaw[split].d){
+      const bp=listRaw[split].d;
+      let s=split;
+      while(s>0 && listRaw[s-1].d===bp) s--;
+      split=s;
+    }
+    const halfUp=split, halfDown=n-split;
+    const upper=listRaw.slice(0,halfUp), lower=listRaw.slice(halfUp);
+    const pickUp=(arr)=>shuffle([...arr].sort((a,b)=>a.creditRank-b.creditRank)).slice(0,Math.min(12,arr.length));
+    const pickDown=(arr)=>shuffle([...arr].sort((a,b)=>a.creditRank-b.creditRank)).slice(0,Math.min(8,arr.length));
+    const up=pickUp(upper), down=pickDown(lower);
+    listRaw.forEach(b=>{ if(!up.includes(b)&&!down.includes(b)){ b.in=false; b.reason="上下半区随机抽取未中"; } });
+    up.forEach(b=>{ b.in=true; b.reason="上半区随机抽取"; });
+    down.forEach(b=>{ b.in=true; b.reason="下半区随机抽取"; });
+    const halfNote=(split!==Math.floor(n/2))?`（报价一致划入下半区后上${halfUp}/下${halfDown}）`:`（上${halfUp}/下${halfDown}）`;
+    addStep("②上下半区随机抽取",`剩余${n}家分上下半区${halfNote}，随机抽取上半区${up.length}家+下半区${down.length}家入围（附件4三(二)5）。`,true);
+    detail=`施工：投标人${N}家 ≥51家，报价排序淘汰靠前${cutF}家、靠后${cutB}家；剩余${n}家分上下半区${halfNote}，随机抽取上半区${up.length}家+下半区${down.length}家入围（附件4三(二)5）。`;
+  }
+  return {list:clone, detail, steps};
+}
+function readPanelK(pkey){ if(pkey==="r21") state.project.r21K=Math.min(Math.max(Math.round(+$("slK_r21").value||1),1),3); }
+function runPanelShortlist(pkey){
+  state.project.creditRatio=+$("slCreditRatio").value||30;
+  state.project.entryDisc=+$("slEntryDisc").value||1.5;
+  readPanelK(pkey);
+  const s=panelOf(pkey);
+  if(!s.shortlist) genPanelBidders(pkey);
+  const res=calcShortlist(s.shortlist);
+  res.creditRatio=state.project.creditRatio;
+  res.entryDisc=state.project.entryDisc;
+  res.r21K=state.project.r21K;
+  s.lastShortlist=res;
+  s.shortlistStep=res.steps.length?res.steps.length-1:null;
+  renderPanelTable(pkey,s.shortlistStep);
+}
+function ensurePanelShortlist(pkey){
+  state.project.creditRatio=+$("slCreditRatio").value||30;
+  state.project.entryDisc=+$("slEntryDisc").value||1.5;
+  readPanelK(pkey);
+  const s=panelOf(pkey);
+  const kMatch=pkey!=="r21"||(s.lastShortlist&&s.lastShortlist.r21K===state.project.r21K);
+  if(!s.lastShortlist||!kMatch||s.lastShortlist.creditRatio!==state.project.creditRatio||s.lastShortlist.entryDisc!==state.project.entryDisc){
+    if(!s.shortlist) genPanelBidders(pkey);
+    const res=calcShortlist(s.shortlist);
+    res.creditRatio=state.project.creditRatio;
+    res.entryDisc=state.project.entryDisc;
+    res.r21K=state.project.r21K;
+    s.lastShortlist=res;
+    s.shortlistStep=res.steps.length?res.steps.length-1:null;
+  }
+}
+function runPanelStep(pkey,k){
+  ensurePanelShortlist(pkey);
+  const s=panelOf(pkey);
+  if(!s.lastShortlist.steps.length){ renderPanelTable(pkey,null); return; }
+  s.shortlistStep=Math.min(k,s.lastShortlist.steps.length-1);
+  renderPanelTable(pkey,s.shortlistStep);
+}
+function sortPanelShortlist(pkey,field,dir){
+  const s=panelOf(pkey);
+  s.shortlistSort={field:field,dir:dir};
+  renderPanelTable(pkey,s.shortlistStep);
+}
+function switchPanel(pkey){
+  state.panelActive=pkey;
+  PANELS.forEach(P=>{
+    const k=P.key;
+    $("panel_"+k).style.display=(k===pkey)?"":"none";
+    $("tab_"+k).classList.toggle("on",k===pkey);
+  });
+  renderActivePanel();
+}
+function renderActivePanel(){
+  const s=panelOf(state.panelActive);
+  renderPanelTable(state.panelActive,s.shortlistStep);
+}
+function srtTh(so,label,field,left){
+  const on=so&&so.field===field;
+  const mark=on?(so.dir===1?"▲":"▼"):"";
+  const cls=(left?"l ":"")+(on?"on-srt":"");
+  return `<th class="${cls}">${label} ${mark}
+    <span class="row" style="gap:2px;display:inline-flex"><button class="srt" data-sort="${field}" data-dir="1" title="升序">↑</button><button class="srt" data-sort="${field}" data-dir="-1" title="降序">↓</button></span></th>`;
+}
+function renderPanelTable(pkey, stepIdx){
+  const s=panelOf(pkey);
+  const t=$("shortlistTable_"+pkey);
+  const res=s.lastShortlist;
+  const arr=res?res.list:(s.shortlist||[]);
+  const maxP=+$("maxPrice").value||10000;
+  const steps=res&&res.steps&&res.steps.length?res.steps:null;
+  const step=(steps&&stepIdx!=null)?steps[Math.min(stepIdx,steps.length-1)]:null;
+  const mark=step?step.mark:null;
+  const so=s.shortlistSort;
+  let html=`<thead><tr>
+    ${srtTh(so,"投标人","name")}
+    ${srtTh(so,"下浮率%","d")}
+    ${srtTh(so,"信用名次","credit")}
+    ${srtTh(so,"报价(万元)","price")}
+    ${srtTh(so,"入围","in")}
+    ${srtTh(so,"说明","reason",true)}
+  </tr></thead><tbody>`;
+  const disp=arr.slice();
+  if(so&&so.field){
+    disp.sort((a,b)=>{
+      let va,vb;
+      if(so.field==="name"){ va=a.name||""; vb=b.name||""; return va.localeCompare(vb,"zh-Hans-CN")*so.dir; }
+      if(so.field==="reason"){ const rv=(x)=>mark?(mark[x.name]?mark[x.name].reason:""):(x.reason||""); va=rv(a); vb=rv(b); return va.localeCompare(vb,"zh-Hans-CN")*so.dir; }
+      if(so.field==="in"){
+        if(mark){ const ga=mark[a.name],gb=mark[b.name]; va=ga?(ga.in?1:0):2; vb=gb?(gb.in?1:0):2; }
+        else { va=a.in?1:0; vb=b.in?1:0; }
+      }
+      else if(so.field==="credit"){ va=+a.creditRank||0; vb=+b.creditRank||0; }
+      else if(so.field==="price"){ va=maxP*(1-(+a.d||0)/100); vb=maxP*(1-(+b.d||0)/100); }
+      else { va=+a.d||0; vb=+b.d||0; }
+      return (va-vb)*so.dir;
+    });
+  }
+  disp.forEach(b=>{
+    const i=arr.indexOf(b);
+    let inHtml, reasonHtml;
+    if(!res){ inHtml="—"; reasonHtml="—"; }
+    else if(mark){
+      const m=mark[b.name];
+      if(!m){ inHtml='<span class="pill">待定</span>'; reasonHtml="待定"; }
+      else if(m.in){ inHtml='<span class="pill green">入围</span>'; reasonHtml=m.reason||""; }
+      else { inHtml='<span class="pill red">淘汰</span>'; reasonHtml=m.reason||""; }
+    }else{
+      inHtml=b.in?'<span class="pill green">入围</span>':'<span class="pill red">淘汰</span>';
+      reasonHtml=b.reason||"";
+    }
+    html+=`<tr><td class="l"><input class="cell wide" data-k="name" data-i="${i}" value="${esc(b.name)}" title="可编辑投标人名称"></td>
+      <td><input class="cell" data-k="d" data-i="${i}" type="number" step="0.01" value="${fmt(b.d,2)}" title="可编辑下浮率%，报价自动联动"></td>
+      <td><input class="cell" data-k="credit" data-i="${i}" type="number" step="1" value="${b.creditRank}" title="可编辑信用名次"></td>
+      <td><input class="cell" data-k="price" data-i="${i}" type="number" step="0.01" value="${fmt(maxP*(1-b.d/100),0)}" title="可编辑报价(万元)，下浮率自动联动"></td>
+      <td>${inHtml}</td><td class="l">${reasonHtml}</td></tr>`;
+  });
+  html+=`</tbody>`; t.innerHTML=html;
+  t.querySelectorAll("[data-sort]").forEach(btn=>{
+    btn.addEventListener("click",()=>sortPanelShortlist(pkey,btn.dataset.sort,+btn.dataset.dir));
+  });
+  t.querySelectorAll("input[data-k]").forEach(inp=>{
+    inp.addEventListener("change",()=>onPanelCellChange(pkey,inp));
+  });
+  const sBox=$("shortlistSummary_"+pkey);
+  if(!res){
+    sBox.textContent="点击『模拟入围』生成入围名单（投标人可在上方表格中逐家核验）。";
+  }else if(step){
+    const si=Math.min(stepIdx,steps.length-1);
+    const names=Object.keys(step.mark);
+    const inCnt=names.filter(n=>step.mark[n].in).length;
+    const outCnt=names.length-inCnt;
+    const pend=arr.length-names.length;
+    const remain=steps.slice(si+1).map(x=>x.title).join(" → ");
+    sBox.innerHTML=`<b>第 ${si+1} 步 · ${step.title}</b><br>`+
+      `<span class="disc">规则：${step.desc}</span><br>`+
+      `<b>已确定：入围 ${inCnt} 家、淘汰 ${outCnt} 家、待定 ${pend} 家</b>`+
+      (remain?`<br>后续步骤：${remain}`:"")+`<br><span class="tiny">点击下方 ①②③ 按钮逐步入围；或『一键模拟入围』直接出最终结果。</span>`;
+  }else{
+    const inArr=arr.filter(b=>b.in);
+    const outArr=arr.filter(b=>!b.in);
+    sBox.innerHTML=`<b>入围 ${inArr.length} 家</b>：${inArr.map(b=>b.name).join("、")||"—"}<br>`+
+      `<b>淘汰 ${outArr.length} 家</b>：${outArr.map(b=>b.name).join("、")||"—"}<br>`+
+      `<span class="disc">规则依据：${res.detail}</span>`;
+  }
+  $("shortlistNote_"+pkey).textContent = "可直接编辑投标人名称/下浮率%/信用名次/报价(万元)，报价与下浮率自动联动换算；编辑后入围结果自动失效，需重新点击『模拟入围』。投标人数量&lt;3家将提示重新招标。";
+}
+function onPanelCellChange(pkey,inp){
+  const s=panelOf(pkey);
+  const i=parseInt(inp.getAttribute("data-i"),10);
+  const b=s.shortlist&&s.shortlist[i];
+  if(!b) return;
+  const maxP=+$("maxPrice").value||10000;
+  const k=inp.getAttribute("data-k");
+  if(k==="d"){
+    let v=parseFloat(inp.value); if(isNaN(v)) v=0;
+    b.d=v;
+  }else if(k==="price"){
+    let v=parseFloat(inp.value); if(isNaN(v)) v=0;
+    if(maxP<=0){ inp.value=""; return; }
+    b.d=(1-v/maxP)*100;
+  }else if(k==="credit"){
+    let v=parseInt(inp.value,10); if(isNaN(v)) v=1;
+    b.creditRank=v;
+  }else if(k==="name"){
+    const v=inp.value.trim();
+    if(v) b.name=v;
+  }
+  s.lastShortlist=null;
+  s.shortlistStep=null;
+  renderPanelTable(pkey,null);
+}
+
+/* ============ 公示清单 ============ */
+function renderPublic(){
+  const p=state.project; const k=state.k;
+  const wC=elWeight("信用"),wS=elWeight("实力"),wP=elWeight("报价"),wV=elWeight("评审意见");
+  const rec=state.bidders.filter(b=>b.recommend);
+  const candN=rec.length>=20?5:3;
+  let s=`项目参数：${p.bidType} / ${p.industry} / 质量目标${p.qualityAbove?"省优及以上":"省优以下"}。`;
+  s+=`<br>权重：信用 ${fmt(wC,1)}%、实力 ${fmt(wS,1)}%、报价 ${fmt(wP,1)}%、评标委员会评审意见 ${fmt(wV,1)}%（合计${fmt(totalWeight(),1)}%）。`;
+  s+=`<br>报价评审：抽取区间 ${fmt(k.kmin,2)}%–${fmt(k.kmax,2)}%，本次抽取 K=${fmt(k.k,2)}%，满分区间 [${fmt(k.k-0.5,2)}%, ${fmt(k.k+0.5,2)}%)。`;
+  s+=`<br>评标委员会推荐定标候选人 ${rec.length} 家 → 确定中标候选人 ${Math.min(candN,rec.length)} 家。`;
+  s+=`<br>异议、投诉渠道：市公共资源交易网，时限不少于3日。`;
+  $("publicResult").innerHTML=s;
+}
+
+/* ============ 导出 ============ */
+function csvCell(s){ s=String(s); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+function download(name,csv,mime){
+  const blob=new Blob(["\ufeff"+csv],{type:mime||"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+}
+/* ============ 导入投标人(CSV) ============ */
+function parseCsv(text){
+  text=String(text).replace(/^\uFEFF/,"");
+  const first=text.split(/\r?\n/,1)[0]||"";
+  let delim=",";
+  [",","\t",";"].forEach(d=>{ if((first.match(new RegExp(d,"g"))||[]).length > (first.match(new RegExp(delim,"g"))||[]).length) delim=d; });
+  const rows=[]; let row=[], cur="", inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else inQ=false; }
+      else cur+=c;
+    }else if(c==='"'){ inQ=true; }
+    else if(c===delim){ row.push(cur); cur=""; }
+    else if(c==="\r"||c==="\n"){
+      if(c==="\r"&&text[i+1]==="\n") i++;
+      row.push(cur); cur=""; rows.push(row); row=[];
+    }
+    else cur+=c;
+  }
+  if(cur!==""||row.length){ row.push(cur); if(row.some(x=>x!=="")) rows.push(row); }
+  return rows;
+}
+function importBiddersCsv(text){
+  const rows=parseCsv(text);
+  if(rows.length<2){ alert("CSV 至少需要表头和 1 行数据。"); return; }
+  const header=rows[0].map(h=>String(h||"").trim());
+  const norm=h=>String(h).toLowerCase().replace(/[%（）()\s、]/g,"");
+  const find=(...keys)=>{
+    const ks=keys.map(norm);
+    for(let i=0;i<header.length;i++) if(ks.includes(norm(header[i]))) return i;
+    return null;
+  };
+  const cName=find("投标人","投标人名称","名称","name","企业名称");
+  const cD=find("下浮率","下浮率%","下浮","报价下浮率","d");
+  const cCR=find("信用名次","信用排名","信用","creditrank","credit");
+  const cRec=find("推荐","评标推荐","recommend");
+  const cUni=find("联合体","union");
+  const cUC=find("另方信用","联合体信用","unioncredit");
+  const cUS=find("另方实力","联合体实力","unionstrength");
+  const subs=allSubs().filter(s=>s.cap!=="price");
+  const subCols={};
+  header.forEach((h,i)=>{ const s=subs.find(x=>x.name===h||norm(x.name)===norm(h)); if(s) subCols[i]=s; });
+  const bidders=[];
+  for(let r=1;r<rows.length;r++){
+    const cells=rows[r];
+    const get=idx=> idx!=null && idx<cells.length ? String(cells[idx]||"").trim() : "";
+    if(cName==null||get(cName)==="") continue;
+    const b=newBidder(get(cName));
+    if(cD!=null&&get(cD)!=="") b.d=Math.round(parseFloat(get(cD))*100)/100;
+    b.creditRank=(cCR!=null&&get(cCR)!=="")?parseInt(get(cCR))||1:r;
+    if(cRec!=null) b.recommend=/^(1|是|true|yes|y|推荐|入围)$/i.test(get(cRec));
+    if(cUni!=null) b.union=/^(1|是|true|yes|y)$/i.test(get(cUni));
+    if(cUC!=null&&get(cUC)!=="") b.unionCredit=parseFloat(get(cUC));
+    if(cUS!=null&&get(cUS)!=="") b.unionStrength=parseFloat(get(cUS));
+    Object.keys(subCols).forEach(ci=>{
+      const v=get(+ci); if(v==="") return;
+      const s=subCols[ci]; const t=parseInt(v);
+      if(!isNaN(t)) b.tiers[s.id]=Math.max(1,Math.min(t,s.zeroTier?s.tierCount+1:s.tierCount));
+    });
+    bidders.push(b);
+  }
+  if(!bidders.length){ alert("未解析到有效投标人（需包含『投标人』列）。"); return; }
+  state.bidders=bidders;
+  const ps=panelOf(state.panelActive);
+  ps.shortlist=bidders.map(b=>({name:b.name,d:b.d,creditRank:b.creditRank,in:false,reason:""}));
+  ps.lastShortlist=null;
+  ps.shortlistSort=null;
+  ps.shortlistStep=null;
+  renderBidders(); renderActivePanel(); updateLive();
+  $("importNote").textContent=`已导入 ${bidders.length} 家投标人。`;
+}
+function expBidderTemplate(){
+  const subs=allSubs().filter(s=>s.cap!=="price");
+  const head=["投标人","下浮率%","信用名次","推荐","联合体"];
+  subs.forEach(s=>head.push(s.name));
+  head.push("另方信用","另方实力");
+  const row=(name,d,cr,rec,uni,tiers)=>{ const r=[name,d,cr,rec,uni]; subs.forEach(s=>r.push(tiers[s.id]!=null?tiers[s.id]:"")); r.push("",""); return r; };
+  const demo=state.bidders.length?state.bidders.slice(0,3):[];
+  const rows=[head];
+  if(demo.length){
+    demo.forEach(b=>rows.push(row(b.name,b.d,b.creditRank,b.recommend?"是":"否",b.union?"是":"否",b.tiers)));
+  }else{
+    const b1=newBidder("示例投标人1"); b1.d=7.5; b1.creditRank=1; b1.tiers={}; subs.forEach((s,i)=>b1.tiers[s.id]=i%2+1);
+    const b2=newBidder("示例投标人2"); b2.d=8.2; b2.creditRank=2; b2.tiers={}; subs.forEach((s,i)=>b2.tiers[s.id]=i%2+2);
+    rows.push(row("示例投标人1",7.5,1,"是","否",b1.tiers),row("示例投标人2",8.2,2,"是","否",b2.tiers));
+  }
+  download("投标人导入模板.csv",rows.map(r=>r.map(csvCell).join(",")).join("\n"));
+}
+function expBidders(){
+  if(!state.bidders.length){ alert("暂无投标人可导出。"); return; }
+  const subs=allSubs().filter(s=>s.cap!=="price");
+  const head=["投标人","下浮率%","信用名次","推荐","联合体"];
+  subs.forEach(s=>head.push(s.name));
+  head.push("另方信用","另方实力");
+  const rows=[head];
+  state.bidders.forEach(b=>{
+    const r=[b.name,b.d,b.creditRank,b.recommend?"是":"否",b.union?"是":"否"];
+    subs.forEach(s=>r.push(b.tiers&&b.tiers[s.id]!=null?b.tiers[s.id]:""));
+    r.push(b.unionCredit!=null?b.unionCredit:"", b.unionStrength!=null?b.unionStrength:"");
+    rows.push(r);
+  });
+  download("投标人列表.csv",rows.map(r=>r.map(csvCell).join(",")).join("\n"));
+}
+/* ============ 全部模块配置 导入/导出(JSON) ============ */
+function syncProjectInputs(){
+  const p=state.project;
+  $("bidType").value=p.bidType; $("industry").value=p.industry;
+  $("quality").value=p.qualityAbove?"1":"0"; $("hasDefense").value=p.hasDefense?"1":"0";
+  $("hasXiamen").value=p.hasXiamen?"1":"0";
+  $("qualLevel").value=p.qualLevel; $("maxPrice").value=p.maxPrice; $("discountPm").value=p.discountPm;
+}
+function expConfig(){
+  const data={
+    app:"评定分离定标计算器-2024", version:1,
+    project:state.project,
+    elements:state.elements,
+    k:state.k,
+    shortlist:{slN_r3:$("slN_r3").value,slN_r21:$("slN_r21").value,slK_r21:$("slK_r21").value,slN_r31:$("slN_r31").value,slN_r51:$("slN_r51").value,slDlo:$("slDlo").value,slDhi:$("slDhi").value,slSeed:$("slSeed").value,slSeedVal:$("slSeedVal").value,slCreditRatio:$("slCreditRatio").value,slEntryDisc:$("slEntryDisc").value},
+    method:{meth:document.querySelector('input[name=meth]:checked').value, dingN:$("dingN").value},
+    bidders:state.bidders,
+  };
+  download("定标计算器-全部配置.json", JSON.stringify(data,null,2), "application/json;charset=utf-8");
+}
+function importConfig(text){
+  text=String(text).replace(/^\uFEFF/,"");
+  let d; try{ d=JSON.parse(text); }catch(e){ alert("JSON 解析失败："+e.message); return; }
+  if(!d||typeof d!=="object"){ alert("配置格式不正确。"); return; }
+  if(d.project){ state.project=Object.assign(state.project,d.project); syncProjectInputs(); }
+  if(d.elements&&d.elements.信用&&d.elements.实力&&d.elements.报价&&d.elements.评审意见) state.elements=d.elements;
+  if(d.k){ state.k=Object.assign(state.k,d.k); }
+  if(d.shortlist){
+    const sl=d.shortlist;
+    PANELS.forEach(P=>{
+      const id="slN_"+P.key;
+      let v=sl[id];
+      if(v==null&&sl.slN!=null&&+sl.slN>=P.min&&+sl.slN<=P.max) v=sl.slN;
+      if(v!=null) $(id).value=Math.min(Math.max(Math.round(+v),P.min),P.max);
+    });
+    if(sl.slK_r21!=null) $("slK_r21").value=Math.min(Math.max(Math.round(+sl.slK_r21),1),3);
+    $("slDlo").value=sl.slDlo!=null?sl.slDlo:$("slDlo").value;
+    $("slDhi").value=sl.slDhi!=null?sl.slDhi:$("slDhi").value;
+    $("slSeed").value=sl.slSeed!=null?sl.slSeed:$("slSeed").value;
+    if(sl.slSeedVal!=null) $("slSeedVal").value=Math.max(0,Math.round(+sl.slSeedVal));
+    $("slCreditRatio").value=sl.slCreditRatio!=null?sl.slCreditRatio:$("slCreditRatio").value;
+    $("slEntryDisc").value=sl.slEntryDisc!=null?sl.slEntryDisc:$("slEntryDisc").value;
+    state.project.creditRatio=+$("slCreditRatio").value||30;
+    state.project.entryDisc=+$("slEntryDisc").value||1.5;
+  }
+  if(d.method){
+    if(d.method.meth){
+      const r=document.querySelector('input[name=meth][value="'+String(d.method.meth).replace(/["\\]/g,"")+'"]');
+      if(r) r.checked=true;
+    }
+    if(d.method.dingN!=null) $("dingN").value=d.method.dingN;
+  }
+  if(Array.isArray(d.bidders)&&d.bidders.length){
+    state.bidders=d.bidders.map(b=>Object.assign({},b));
+    const ps=panelOf(state.panelActive);
+    ps.shortlist=state.bidders.map(b=>({name:b.name,d:b.d,creditRank:b.creditRank||1,in:false,reason:""}));
+    ps.lastShortlist=null;
+    ps.shortlistSort=null;
+    ps.shortlistStep=null;
+  }
+  $("kmin").value=state.k.kmin; $("kmax").value=state.k.kmax;
+  $("kstep").value=state.k.step; $("kval").value=state.k.k; state.k.set=true;
+  renderParamNote(); renderConfig(); renderBidders(); readK();
+  renderActivePanel(); updateLive(); renderPublic();
+  $("configNote").textContent=`已导入配置（①-⑥）。`;
+}
+function expWeight(){
+  let rows=[["要素","子要素","权重%","档位数","最低档分值","零分档","上限约束","条款"]];
+  const p=state.project;
+  CATS.forEach(cat=>{
+    state.elements[cat].subs.forEach(s=>{
+      const tiers=genTiers(s); const lo=s.zeroTier?0:tiers[tiers.length-1];
+      let cap="";
+      if(s.cap==="award") cap=`国家级≤${s.natMax}/省级≤${s.provMax}`;
+      else if(s.cap==="perf") cap=`企业≤${s.entMax}/个人≤${s.perMax}`;
+      else if(s.cap==="qual") cap=`目标${s.targetLevel}级(资格可提高一级)`;
+      else if(s.cap==="defense") cap=`≤10%,应急≤5%`;
+      else if(s.cap==="xiamen_credit") cap=`≤A+${s.aPlus}`;
+      else if(s.cap==="price") cap=`K引擎自动`;
+      rows.push([cat,s.name,s.weight,s.tierCount,lo,s.zeroTier?"是":"否",cap,"附件1"]);
+    });
+  });
+  rows.push([]);
+  rows.push(["禁设子要素（附件1二，自定义时拦截）", BAN.join("、")]);
+  const csv=rows.map(r=>r.map(csvCell).join(",")).join("\n");
+  download("定标要素权重表.csv",csv);
+}
+function expK(){
+  const k=state.k; const price=state.elements.报价.subs[0];
+  const n=price?price.tierCount:5, zero=price?price.zeroTier:false;
+  const iv=priceIntervals(k.k,k.step,n,zero); const {tiers}=getKTiers();
+  let rows=[["档位","得分","下浮率区间(含~不含)","说明"]];
+  iv.forEach(v=>{ const score=v.tier===n+1?0:tiers[v.tier-1];
+    const rng=v.zero?"—":`${fmt(v.lo,2)}~${fmt(v.hi,2)}`;
+    rows.push([v.tier===n+1?"零分档":v.tier+"档",score,rng,v.txt]); });
+  rows.push([]); rows.push(["K值",fmt(k.k,2)+"%","抽取区间",`${fmt(k.kmin,2)}%~${fmt(k.kmax,2)}%`]);
+  const csv=rows.map(r=>r.map(csvCell).join(",")).join("\n");
+  download("报价档次区间表.csv",csv);
+}
+function expResult(){
+  const subs=allSubs();
+  let rows=[["排名","投标人","综合得分","下浮率%","评标推荐"]];
+  const ranked=[];
+  state.bidders.forEach((b,i)=>{ if(!b.recommend) return; const r=bidderScore(b); ranked.push({name:b.name,total:r.total,d:b.d,det:r.det}); });
+  ranked.sort((a,b)=>b.total-a.total||b.d-a.d);
+  ranked.forEach((r,idx)=>{
+    const parts=subs.map(s=>s.name+":"+(r.det[s.id]?fmt(r.det[s.id].contrib,2):"-"));
+    rows.push([idx+1,r.name,fmt(r.total,2),fmt(r.d,2),"是",...parts]);
+  });
+  const csv=rows.map(r=>r.map(csvCell).join(",")).join("\n");
+  download("模拟结果表.csv",csv);
+}
+function expReport(){
+  const p=state.project; const k=state.k;
+  let rows=[["项目","内容"],["招标类型",p.bidType],["所属行业",p.industry],
+    ["质量目标",p.qualityAbove?"省优及以上":"省优以下"],
+    ["资格条件资质等级",p.qualLevel+"级"],
+    ["信用要素权重",fmt(elWeight("信用"),1)+"%"],
+    ["实力要素权重",fmt(elWeight("实力"),1)+"%"],
+    ["报价要素权重",fmt(elWeight("报价"),1)+"%"],
+    ["评标委员会评审意见权重",fmt(elWeight("评审意见"),1)+"%"],
+    ["权重合计",fmt(totalWeight(),1)+"%"],
+    ["K抽取区间",fmt(k.kmin,2)+"%~"+fmt(k.kmax,2)+"%"],
+    ["本次抽取K值",fmt(k.k,2)+"%"],
+    ["满分区间","["+fmt(k.k-0.5,2)+"%,"+fmt(k.k+0.5,2)+"%)"],
+    ["定标方法",document.querySelector('input[name=meth]:checked').value],
+    ["定标委员会人数(票决)",$("dingN").value],
+    ["附件依据","厦住建规〔2024〕6号 附件1-5"]];
+  const csv=rows.map(r=>r.map(csvCell).join(",")).join("\n");
+  download("定标报告要素.csv",csv);
+}
+function expPanelShortlist(pkey){
+  const s=panelOf(pkey);
+  if(!s.shortlist){ alert("请先点击『生成投标人』与『模拟入围』。"); return; }
+  state.project.creditRatio=+$("slCreditRatio").value||30;
+  state.project.entryDisc=+$("slEntryDisc").value||1.5;
+  readPanelK(pkey);
+  const res=s.lastShortlist||calcShortlist(s.shortlist);
+  s.lastShortlist=res;
+  const maxP=state.project.maxPrice>0?state.project.maxPrice:10000;
+  let rows=[["投标人","下浮率%","报价(万元)","信用名次","入围","说明"]];
+  res.list.forEach(b=>{ rows.push([b.name,fmt(b.d,2),fmt(maxP*(1-b.d/100),0),b.creditRank,b.in?"是":"否",b.reason||""]); });
+  rows.push([]);
+  rows.push(["入围名单", res.detail]);
+  const csv=rows.map(r=>r.map(csvCell).join(",")).join("\n");
+  download("入围名单.csv",csv);
+}
+
+/* ============ 事件绑定 ============ */
+function bindAll(){
+  ["bidType","industry","quality","hasDefense","hasXiamen","qualLevel","maxPrice","discountPm"].forEach(id=>{
+    $(id).addEventListener("change",()=>{
+      state.project.bidType=$("bidType").value;
+      state.project.industry=$("industry").value;
+      state.project.qualityAbove=$("quality").value==="1";
+      state.project.hasDefense=$("hasDefense").value==="1";
+      state.project.hasXiamen=$("hasXiamen").value==="1";
+      state.project.qualLevel=+$("qualLevel").value||1;
+      state.project.maxPrice=+$("maxPrice").value||0;
+      state.project.discountPm=+$("discountPm").value||4;
+      if(state.project.bidType==="监理"){
+        const xm=state.elements.信用.subs.find(s=>s.cap==="xiamen_credit");
+        if(xm) xm.aPlus=0;
+      }
+      // 资质等级变化时联动刷新资质子要素的满分档目标等级：qualLevel≤2 → 1（一级，最高）；否则 → qualLevel-1（提高一级）
+      const ql=state.elements.实力.subs.find(s=>s.cap==="qual");
+      if(ql) ql.targetLevel=state.project.qualLevel<=2?1:state.project.qualLevel-1;
+      renderParamNote(); renderConfig(); renderBidders();
+    });
+  });
+  ["kmin","kmax","kstep","kval"].forEach(id=>$(id).addEventListener("input",readK));
+  $("drawK").onclick=drawK; $("applyK").onclick=readK;
+  $("resetKScores").onclick=resetKScores;
+  $("loadTypeDefaults").onclick=()=>{ buildDefaults(); renderConfig(); renderBidders(); $("defaultsNote").textContent="已载入 "+state.project.bidType+" 默认权重"; };
+  $("addBidder").onclick=()=>{ state.bidders.push(newBidder()); renderBidders(); };
+  $("loadDemo").onclick=loadDemo;
+  $("clearBidders").onclick=()=>{ state.bidders=[]; renderBidders(); };
+  $("importBidders").onclick=()=>$("importFile").click();
+  $("expBidderTemplate").onclick=expBidderTemplate;
+  $("expBidders").onclick=expBidders;
+  $("importFile").addEventListener("change",e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      const buf=rd.result; let text=null;
+      try{ text=new TextDecoder("utf-8",{fatal:true}).decode(buf); }
+      catch(err){ try{ text=new TextDecoder("gb18030").decode(buf); }catch(err2){ text=new TextDecoder("utf-8").decode(buf); } }
+      importBiddersCsv(text); e.target.value="";
+    };
+    rd.readAsArrayBuffer(f);
+  });
+  $("expConfig").onclick=expConfig;
+  $("importConfig").onclick=()=>$("configFile").click();
+  $("configFile").addEventListener("change",e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      const buf=rd.result; let text=null;
+      try{ text=new TextDecoder("utf-8",{fatal:true}).decode(buf); }
+      catch(err){ try{ text=new TextDecoder("gb18030").decode(buf); }catch(err2){ text=new TextDecoder("utf-8").decode(buf); } }
+      importConfig(text); e.target.value="";
+    };
+    rd.readAsArrayBuffer(f);
+  });
+  $("sens").addEventListener("input",runSensitivity);
+  $("sensFrom").addEventListener("change",runSensitivity);
+  $("sensTo").addEventListener("change",runSensitivity);
+  $("runMethod").onclick=runMethod;
+  $("reVote").onclick=()=>{ if(isDesign()) runMethod(); else alert("直接票决法仅设计/勘察设计合并可用"); };
+  PANELS.forEach(P=>{
+    const k=P.key;
+    $("tab_"+k).onclick=()=>switchPanel(k);
+    $("genBidders_"+k).onclick=()=>genPanelBidders(k);
+    $("runShortlist_"+k).onclick=()=>runPanelShortlist(k);
+    $("expShortlist_"+k).onclick=()=>expPanelShortlist(k);
+    P.steps.forEach((_,i)=>{ $("simStep"+(i+1)+"_"+k).onclick=()=>runPanelStep(k,i); });
+  });
+  ["expWeight","expK","expResult","expReport"].forEach((id,i)=>{ $(id).onclick=[expWeight,expK,expResult,expReport][i]; });
+}
+function loadDemo(){
+  state.bidders=[];
+  const mk=(name,d,tiers,union=false)=>{ const b=newBidder(name); b.d=d; if(union)b.union=true;
+    Object.assign(b.tiers,tiers); state.bidders.push(b); return b; };
+  const subs=(k)=>state.elements[k].subs;
+  const f={
+    奖项:subs("实力").find(s=>s.cap==="award").id,
+    业绩:subs("实力").find(s=>s.cap==="perf").id,
+    资质:subs("实力").find(s=>s.cap==="qual").id,
+    团队:subs("实力").find(s=>s.key==="team").id,
+    答辩:subs("实力").find(s=>s.cap==="defense").id,
+    国信:subs("信用").find(s=>s.cap==="national"||s.key==="national").id,
+    省信:subs("信用").find(s=>s.key==="provincial").id,
+    厦门:subs("信用").find(s=>s.cap==="xiamen_credit").id,
+    评审:subs("评审意见")[0].id,
+  };
+  const one=t=>{ const o={}; for(const k in t) o[f[k]]=t[k]; return o; };
+  mk("甲建设集团",7.80,one({奖项:1,业绩:1,资质:1,团队:2,答辩:1,国信:1,省信:1,厦门:1,评审:1}));
+  mk("乙工程公司",8.10,one({奖项:2,业绩:2,资质:1,团队:1,答辩:2,国信:2,省信:1,厦门:2,评审:2}));
+  mk("丙建筑有限公司",7.30,one({奖项:3,业绩:1,资质:2,团队:3,答辩:3,国信:1,省信:2,厦门:1,评审:1}));
+  renderBidders();
+}
+
+/* ============ 启动 ============ */
+buildDefaults();
+bindAll();
+renderParamNote();
+renderConfig();
+renderAppendix5();
+loadDemo();
+renderPublic();
+</script>
+</body>
+</html>

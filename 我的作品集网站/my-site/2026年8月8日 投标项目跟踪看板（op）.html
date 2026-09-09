@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>市场投标项目跟踪看板</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#eef2f7; --panel:#ffffff; --panel2:#f6f8fb; --line:#e3e8ef; --text:#1f2d3d;
+  --muted:#7b8aa0; --accent:#2563eb; --accent2:#0ea5e9; --danger:#e11d48; --warn:#f59e0b;
+  --ok:#10b981; --redbg:#fde8ec; --warnbg:#fdf0da; --okbg:#e3f7ef;
+  --shadow:0 1px 3px rgba(15,23,42,.07),0 8px 24px rgba(15,23,42,.06);
+  --radius:12px;
+}
+body.dark{
+  --bg:#0e1526; --panel:#182238; --panel2:#1d2942; --line:#2b3a55; --text:#e6edf7;
+  --muted:#8da1bd; --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  --redbg:rgba(225,29,72,.16); --warnbg:rgba(245,158,11,.14); --okbg:rgba(16,185,129,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;transition:background .2s,color .2s}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select,textarea{font-family:inherit;font-size:13px;color:var(--text)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#c3ccd8;border-radius:8px}
+body.dark ::-webkit-scrollbar-thumb{background:#3c4d6b}
+
+/* ── Header ── */
+header{display:flex;align-items:center;gap:14px;padding:0 20px;height:60px;background:linear-gradient(90deg,#1e3a8a,#2563eb 55%,#0ea5e9);color:#fff;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
+.logo .mark{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:19px}
+.date{font-size:12.5px;opacity:.85;background:rgba(255,255,255,.14);padding:5px 10px;border-radius:20px;white-space:nowrap}
+.tabs{display:flex;gap:6px;margin-left:8px;flex:1;overflow-x:auto}
+.tab{padding:8px 16px;border-radius:9px;color:#dbe7ff;background:transparent;font-size:14px;transition:.15s;white-space:nowrap}
+.tab:hover{background:rgba(255,255,255,.14)}
+.tab.active{background:#fff;color:#1d4ed8;font-weight:700}
+.hdr-actions{display:flex;gap:8px;align-items:center}
+.hbtn{padding:8px 13px;border-radius:9px;background:rgba(255,255,255,.16);color:#fff;font-size:13px;transition:.15s;white-space:nowrap}
+.hbtn:hover{background:rgba(255,255,255,.28)}
+.hbtn.primary{background:#fff;color:#1d4ed8;font-weight:700}
+.hbtn.primary:hover{background:#f1f5ff}
+
+/* ── Global filter bar ── */
+.filterbar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:11px 20px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:60px;z-index:40}
+.filterbar input[type=text],.filterbar select,.filterbar input[type=date]{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);outline:none}
+.filterbar input:focus,.filterbar select:focus{border-color:var(--accent)}
+.filterbar .grow{flex:1}
+.fbtn{padding:7px 12px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px}
+.fbtn:hover{opacity:.9}
+.fbtn.ghost{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.fbtn.ghost:hover{color:var(--text)}
+.fb{display:flex;align-items:center;gap:4px}
+.fb label{color:var(--muted);font-size:13px}
+
+main{padding:18px 20px 30px;max-width:1680px;margin:0 auto}
+.hidden{display:none!important}
+.section{animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── KPI cards ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi .lbl{font-size:12.5px;color:var(--muted)}
+.kpi .num{font-size:26px;font-weight:800;margin-top:4px;line-height:1.1}
+.kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.kpi .bar2{height:4px;border-radius:4px;position:absolute;left:0;bottom:0;right:0}
+.kpi .num small{font-size:13px;font-weight:600;color:var(--muted)}
+
+/* ── Dashboard layout ── */
+.dash-wrap{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card .card-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+.card .card-hd .t{font-size:15px;font-weight:700}
+.card .card-bd{padding:14px 16px}
+.badge{font-size:11.5px;padding:2px 8px;border-radius:20px;font-weight:700}
+.badge.danger{background:var(--redbg);color:var(--danger)}
+.badge.warn{background:var(--warnbg);color:#b45309}
+.badge.ok{background:var(--okbg);color:#047857}
+body.dark .badge.warn{color:#fbbf24}
+body.dark .badge.ok{color:#34d399}
+
+/* donut + legend */
+.chart-flex{display:flex;gap:18px;align-items:center;flex-wrap:wrap;min-height:150px}
+.donut{width:160px;height:160px;border-radius:50%;position:relative;flex:none}
+.donut .hole{position:absolute;inset:34px;background:var(--panel);border-radius:50%;display:grid;place-items:center;text-align:center}
+.donut .hole b{font-size:22px;display:block}
+.legend{display:flex;flex-direction:column;gap:7px;min-width:150px}
+.legend .row{display:flex;align-items:center;gap:8px;font-size:13px}
+.legend .dot{width:10px;height:10px;border-radius:3px;flex:none}
+.legend .cnt{margin-left:auto;color:var(--muted);font-size:12px}
+
+/* bars */
+.bars{display:flex;flex-direction:column;gap:10px}
+.bars .brow{display:flex;align-items:center;gap:10px;font-size:13px}
+.bars .bname{width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.bars .btrack{flex:1;height:18px;background:var(--panel2);border-radius:6px;overflow:hidden;position:relative;border:1px solid var(--line)}
+.bars .btrack .fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.bars .bval{width:86px;text-align:right;color:var(--text);font-weight:600}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:6px}
+.tl .ti{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;background:var(--panel2);border:1px solid var(--line)}
+.tl .ti .d{width:84px;font-size:12.5px;color:var(--muted);flex:none}
+.tl .ti .n{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl .ti .days{font-size:12px;font-weight:700;flex:none;padding:3px 9px;border-radius:20px}
+
+/* warnings list */
+.warn-list{display:flex;flex-direction:column;max-height:460px;overflow:auto}
+.warn-item{display:flex;gap:10px;align-items:flex-start;padding:9px 16px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45}
+.warn-item:last-child{border-bottom:none}
+.warn-item .ic{flex:none;font-size:15px;margin-top:1px}
+.warn-item.danger{background:linear-gradient(0deg,var(--redbg),transparent 80%)}
+.warn-item.warn{background:linear-gradient(0deg,var(--warnbg),transparent 80%)}
+.warn-item.ok{background:transparent}
+.warn-item .w-txt{flex:1}
+.warn-item .w-txt .pn{font-weight:700}
+.warn-item .w-meta{color:var(--muted);font-size:12px;flex:none;white-space:nowrap;padding-top:2px}
+
+/* trend */
+.trend{width:100%;height:150px}
+
+/* ── Kanban ── */
+.kanban{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
+.kcol{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius);min-width:225px;max-width:260px;flex:1 1 220px;display:flex;flex-direction:column;max-height:calc(100vh - 215px)}
+.kcol.over{outline:2px dashed var(--accent);outline-offset:-2px}
+.kcol-hd{padding:10px 12px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;border-bottom:1px solid var(--line)}
+.kcol-hd .cnt{margin-left:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:1px 9px;font-size:12px;color:var(--muted)}
+.kcol-body{padding:9px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:60px;flex:1}
+.kcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 11px;box-shadow:var(--shadow);cursor:grab;user-select:none;transition:transform .12s,border-color .12s}
+.kcard:active{cursor:grabbing}
+.kcard:hover{border-color:var(--accent);transform:translateY(-1px)}
+.kcard.drag{opacity:.45}
+.kcard .kc-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.kcard .amt{font-size:13px;font-weight:800}
+.kcard .kname{font-weight:600;font-size:13.5px;line-height:1.35;margin-bottom:7px;word-break:break-all}
+.kcard .kmeta{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:12px;color:var(--muted);margin-top:7px}
+.kcard .km{display:inline-flex;align-items:center;gap:4px}
+.dup{height:4px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.dup .i{height:100%;background:var(--accent2);border-radius:4px;transition:width .3s}
+.man{padding:2px 7px;border-radius:12px;font-size:11.5px;background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+.daysp{padding:2px 7px;border-radius:12px;font-size:11.5px;font-weight:700}
+
+/* ── Table ── */
+.table-card{overflow:auto;max-height:calc(100vh - 245px);border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:1280px}
+thead th{position:sticky;top:0;background:#f8fafc;color:var(--muted);font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:2;cursor:pointer;user-select:none}
+body.dark thead th{background:#1d2942}
+thead th .arr{opacity:.45;font-size:11px}
+thead th.sorted{color:var(--accent)}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:hover{background:var(--panel2)}
+.t-cell{display:inline-block;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.stch{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;color:#fff}
+.amount{font-weight:700}
+.actions{white-space:nowrap}
+.ia{padding:5px 10px;border-radius:7px;font-size:12.5px;margin-right:5px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
+.ia.edit:hover{color:var(--accent);border-color:var(--accent)}
+.ia.del:hover{color:var(--danger);border-color:var(--danger)}
+.foot{display:flex;align-items:center;gap:12px;padding:10px 4px;color:var(--muted);font-size:13px}
+.tpl{height:6px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;width:90px;display:inline-block;vertical-align:middle;margin-right:6px}
+.tpl .i{height:100%;background:var(--accent2)}
+
+/* ── Modal ── */
+.modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:grid;place-items:center;z-index:100;animation:fade .18s}
+.modal{background:var(--panel);border-radius:14px;width:min(680px,94vw);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal .m-hd{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;font-size:16px;font-weight:700}
+.modal .m-hd .x{cursor:pointer;font-size:22px;color:var(--muted);background:none;font-weight:400;line-height:1}
+.modal .m-bd{padding:16px 20px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.ff label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.ff label b{color:var(--danger);font-weight:700}
+.ff input[type=text],.ff input[type=date],.ff input[type=number],.ff select,.ff textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);outline:none}
+.ff input:focus,.ff select:focus,.ff textarea:focus{border-color:var(--accent)}
+.ff.full{grid-column:1/-1}
+.ff textarea{resize:vertical;min-height:56px}
+.ff-title{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px}
+.stp{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);cursor:pointer;font-size:12.5px;user-select:none;transition:.12s}
+.stp:hover{border-color:var(--accent)}
+.stp.on{background:var(--okbg);border-color:var(--ok);color:#047857}
+body.dark .stp.on{color:#34d399}
+.stp input{accent-color:var(--ok);cursor:pointer}
+.m-ft{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:var(--panel)}
+.btn{padding:8px 22px;border-radius:9px;font-size:14px;background:var(--panel2);border:1px solid var(--line);color:var(--text)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.btn.primary:hover{opacity:.92;color:#fff}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn.danger:hover{opacity:.9}
+
+/* toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:#1f2937;color:#fff;padding:11px 22px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:.3s;z-index:300;font-size:13.5px;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{background:var(--danger)}
+
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px 20px 24px}
+
+@media(max-width:980px){.dash-wrap{grid-template-columns:1fr}.fgrid{grid-template-columns:1fr}.tabs{margin-left:2px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="mark">📊</span>市场投标项目跟踪看板</div>
+  <div class="date" id="hdrDate"></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="dashboard">📈 数据驾驶舱</button>
+    <button class="tab" data-view="kanban">🗂 任务看板</button>
+    <button class="tab" data-view="table">📋 数据表格</button>
+  </nav>
+  <div class="hdr-actions">
+    <button class="hbtn" onclick="darkToggle()" id="themeBtn">🌙 深色</button>
+    <button class="hbtn" onclick="backupJSON()" title="导出 JSON 备份">💾 备份</button>
+    <button class="hbtn" onclick="loadDemo()" title="载入演示数据（覆盖现有数据）">🧪 演示</button>
+    <button class="hbtn primary" onclick="openModal()">＋ 新增项目</button>
+  </div>
+</header>
+
+<div class="filterbar" id="filterbar">
+  <input type="text" id="fKw" placeholder="🔍 搜索项目 / 投标主体 / 负责人 / 备注…" style="min-width:230px">
+  <span class="fb"><label>状态</label>
+    <select id="fStatus"><option value="全部">全部</option></select></span>
+  <span class="fb"><label>负责人</label>
+    <select id="fManager"><option value="全部">全部</option></select></span>
+  <span class="fb"><label>开标</label>
+    <input type="date" id="fFrom"><span style="color:var(--muted)">~</span><input type="date" id="fTo"></span>
+  <div class="grow"></div>
+  <button class="fbtn ghost" onclick="clearFilters()">重置</button>
+  <button class="fbtn" onclick="exportExcel()">⬇ 导出 Excel</button>
+  <button class="fbtn ghost" onclick="document.getElementById('xlsxFile').click()">⬆ 导入 Excel</button>
+  <input type="file" id="xlsxFile" accept=".xlsx,.xls,.csv" hidden>
+</div>
+
+<main>
+  <!-- ─── 驾驶舱 ─── -->
+  <section id="view-dashboard" class="section">
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="dash-wrap">
+      <div class="card">
+        <div class="card-hd"><span class="t">⚠️ 预警中心</span><span class="badge warn" id="warnCount"></span></div>
+        <div class="warn-list" id="warnList"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="t">🎯 未来开标时间轴</span><span class="badge ok" id="tlCount"></span></div>
+        <div class="card-bd"><div class="tl" id="tlList"></div></div>
+      </div>
+    </div>
+    <div class="dash-wrap">
+      <div class="card">
+        <div class="card-hd"><span class="t">🍩 投标状态分布</span></div>
+        <div class="card-bd"><div class="chart-flex" id="statusChart"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="t">💰 按投标主体金额（亿元）</span></div>
+        <div class="card-bd bars" id="bidderBars"></div>
+      </div>
+    </div>
+    <div class="card" id="trendCard">
+      <div class="card-hd"><span class="t">📅 月度挂网 / 开标趋势</span><span class="badge ok">近12个月</span></div>
+      <div style="padding:10px 12px 6px"><svg id="trendSvg" class="trend" preserveAspectRatio="xMidYMid meet"></svg></div>
+    </div>
+  </section>
+
+  <!-- ─── 任务看板 ─── -->
+  <section id="view-kanban" class="section hidden">
+    <div class="kanban" id="kanban"></div>
+  </section>
+
+  <!-- ─── 数据表格 ─── -->
+  <section id="view-table" class="section hidden">
+    <div class="table-card">
+      <table id="grid">
+        <thead id="gridHead"></thead>
+        <tbody id="gridBody"></tbody>
+      </table>
+    </div>
+    <div class="foot"><span id="tCount">共 0 条</span><span style="color:var(--muted)">点击表头排序</span></div>
+  </section>
+</main>
+
+<footer>数据保存在本浏览器 localStorage · 用「导出 Excel / 备份」存档 · 拖拽卡片可变更投标状态 · 演示数据可一键载入</footer>
+
+<div id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+"use strict";
+/* ══════════════ 常量与数据模型 ══════════════ */
+const LS_KEY = "toubiao_kanban_v1";
+const STEPS = [
+  ["flag_legal","送法务"],["draft_legal","法务初稿"],["cost","成本现金本"],["limit_report","限额报告"],
+  ["credit","资信法意"],["info_fill","信息填报"],["finance","财务流程"],["related","相关方"],
+  ["info_track","信息跟踪"],["deposit_seal","保证金用印"],["limit_seal","限额用印"],
+  ["bid_signup","投标报名"],["pre_print","评审前打印"],["bid_review","投标评审"]
+];
+const STATUSES = [
+  {key:"track",label:"挂网跟踪",color:"#3b82f6"},
+  {key:"eval",label:"投标评估",color:"#8b5cf6"},
+  {key:"bid",label:"已投标",color:"#f59e0b"},
+  {key:"opened",label:"已开标",color:"#f97316"},
+  {key:"win",label:"中标",color:"#10b981"},
+  {key:"lost",label:"未中标·放弃",color:"#ef4444"}
+];
+const ST = {}; STATUSES.forEach(s=>ST[s.key]=s);
+
+/* 表格列定义：严格按附表顺序：
+   序号/项目名称/金额(亿元)/挂网时间/投标主体/开标时间/保证金交付时间
+   送法务/法务初稿/成本现金本/限额报告/资信法意/信息填报/财务流程/相关方/信息跟踪/保证金用印/限额用印/投标报名/评审前打印/投标评审
+   招标模式及评标办法/保证金(万元)/责任客户经理 */
+const COLUMNS = [
+  ["id","序号"],["name","项目名称"],["amt","金额(亿元)"],["listDate","挂网时间"],["bidder","投标主体"],
+  ["openDate","开标时间"],["depDue","保证金交付时间"],
+  ...STEPS.map(s=>["s_"+s[0],s[1]]),
+  ["mode","招标模式及评标办法"],["deposit","保证金(万元)"],["manager","责任客户经理"]
+];
+const STEP_COL_KEYS = {};
+STEPS.forEach(s=>STEP_COL_KEYS["s_"+s[0]]=s[0]);
+const EXCEL_HEADERS = ["序号","项目名称","金额(亿元)","挂网时间","投标主体","开标时间","保证金交付时间",
+  ...STEPS.map(s=>s[1]),
+  "招标模式及评标办法","保证金(万元)","责任客户经理","投标状态","进度%",
+  "完成项数"];
+
+let data = loadData();
+let view = "dashboard";
+let sortKey = "", sortDir = 1;
+let currentId = null;
+let dragId = null;
+
+/* ══════════════ 工具函数 ══════════════ */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmt(n, d=2){ n = Number(n||0); return isFinite(n)? n.toLocaleString("zh-CN",{minimumFractionDigits:d,maximumFractionDigits:d}) : "0"; }
+function pct(p){ return Math.round(Math.max(0,Math.min(100,p))); }
+function today0(){ const d=new Date(); d.setHours(0,0,0,0); return d; }
+function parseDate(s){
+  if(!s) return null;
+  const m = String(s).match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if(!m) return null;
+  return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+}
+function daysLeft(s){
+  const d = parseDate(s); if(!d) return null;
+  return Math.round((d - today0())/86400000);
+}
+function daysAgoText(n){
+  if(n===null) return "";
+  if(n>0) return n+"天后";
+  if(n===0) return "今天";
+  return "已逾期"+(-n)+"天";
+}
+function projectProgress(p){
+  const keys = STEPS.map(s=>s[0]);
+  let done = 0; keys.forEach(k=>{ if(p.steps && p.steps[k]) done++; });
+  return {done, total: keys.length, pct: pct(done/keys.length*100)};
+}
+
+/* ══════════════ 数据持久化 / 演示数据 ══════════════ */
+function saveData(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){ toast("保存失败："+e.message,true); } }
+function loadData(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr)) return arr; }
+  }catch(e){}
+  return seedDemo();
+}
+function seedDemo(){
+  const y = d => { const t=new Date(); t.setDate(t.getDate()+d); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); };
+  const done = keys => { const o={}; keys.forEach(k=>o[k]=1); return o; };
+  return [
+    {id:1,name:"厦门市集美区2025P03地块及配套工程（房建·评定分离）",amt:7.16,listDate:y(-50),bidder:"厦门国贸地产",openDate:y(7),depDue:y(2),deposit:800,mode:"评定分离·综合评分",manager:"乔杨",note:"保证金已递交",status:"eval",
+     steps:done(["flag_legal","draft_legal","cost","limit_report","credit","info_fill","finance","related","info_track","deposit_seal","limit_seal","bid_signup"])},
+    {id:2,name:"大田县葛坑山铜多金属矿整流采选开发项目（施工）",amt:4.05,listDate:y(-12),bidder:"矿业开发联合体",openDate:y(16),depDue:"",deposit:0,mode:"综合评估法",manager:"吕品",note:"待核实矿区及矿业权信息",status:"track",
+     steps:done(["flag_legal","draft_legal"])},
+    {id:3,name:"2026P06地块项目工程总承包（EPC）",amt:6.35,listDate:y(-20),bidder:"中建某局",openDate:y(3),depDue:y(-1),deposit:1200,mode:"综合评估法A类",manager:"乔杨",note:"已缴纳保证金",status:"bid",
+     steps:done(["flag_legal","draft_legal","cost","limit_report","credit","info_fill","finance","related","info_track","deposit_seal","limit_seal","bid_signup","pre_print"])},
+    {id:4,name:"平和景荣才中学高中部建设（施工）",amt:1.24,listDate:y(-30),bidder:"中建某局",openDate:y(16),depDue:y(11),deposit:150,mode:"固定单价合同",manager:"陈浩斌",note:"",status:"eval",
+     steps:done(["flag_legal","draft_legal","cost"])}
+  ];
+}
+function loadDemo(){
+  if(!confirm("将使用演示数据覆盖当前全部数据，确定继续？")) return;
+  data = seedDemo(); saveData(); renderAll(); toast("已载入演示数据");
+}
+
+/* ══════════════ 筛选 / 查询 ══════════════ */
+function filters(){
+  return {
+    kw: ($("fKw").value||"").trim().toLowerCase(),
+    status: $("fStatus").value,
+    manager: $("fManager").value,
+    from: $("fFrom").value,
+    to: $("fTo").value
+  };
+}
+function filteredData(){
+  const f = filters();
+  let rows = data.filter(p=>{
+    if(f.status!=="全部" && p.status!==f.status) return false;
+    if(f.manager!=="全部" && p.manager!==f.manager) return false;
+    if(f.kw){
+      const hay = [p.name,p.bidder,p.manager,p.note,p.mode,p.region||""].join(" ").toLowerCase();
+      if(!hay.includes(f.kw)) return false;
+    }
+    if(f.from || f.to){
+      const d = parseDate(p.openDate); if(!d) return false;
+      if(f.from){ const a=parseDate(f.from); if(a && d<a) return false; }
+      if(f.to){ const b=parseDate(f.to); b.setHours(23,59,59); if(d>b) return false; }
+    }
+    return true;
+  });
+  if(sortKey){
+    rows.sort((a,b)=>{
+      let va, vb;
+      if(STEP_COL_KEYS[sortKey]){ va=(a.steps&&a.steps[STEP_COL_KEYS[sortKey]])?1:0; vb=(b.steps&&b.steps[STEP_COL_KEYS[sortKey]])?1:0; }
+      else { va=a[sortKey]; vb=b[sortKey]; }
+      let r;
+      if(sortKey==="amt" || sortKey==="deposit"){ r=(Number(va||0)-Number(vb||0)); }
+      else if(sortKey==="id"){ r=(Number(va||0)-Number(vb||0)); }
+      else if(sortKey==="progress"){ r=(projectProgress(a).pct-projectProgress(b).pct); }
+      else if(sortKey==="s_STATUS"){ r=String((ST[a.status]||{}).label||"").localeCompare(String((ST[b.status]||{}).label||""),"zh"); }
+      else if(sortKey==="s_NOTE"){ r=String(a.note||"").localeCompare(String(b.note||""),"zh"); }
+      else { r=String(va||"").localeCompare(String(vb||""),"zh"); }
+      return r*sortDir;
+    });
+  } else {
+    rows.sort((a,b)=>a.id-b.id);
+  }
+  return rows;
+}
+function clearFilters(){
+  $("fKw").value=""; $("fStatus").value="全部"; $("fManager").value="全部"; $("fFrom").value=""; $("fTo").value="";
+  renderAll();
+}
+
+/* ══════════════ 预警引擎 ══════════════ */
+function buildWarnings(){
+  const warns=[];
+  const pending = new Set(["track","eval","bid"]);
+  data.forEach(p=>{
+    const dl = daysLeft(p.openDate);
+    const pend = pending.has(p.status);
+    if(dl!==null && pend){
+      if(dl<0) warns.push({lvl:"danger",ic:"🚨",txt:`<span class="pn">${esc(p.name)}</span> 开标时间已逾期 ${-dl} 天，请尽快处理。`,meta:"逾期"});
+      else if(dl<=3) warns.push({lvl:"danger",ic:"⏰",txt:`<span class="pn">${esc(p.name)}</span> 将于 <b>${esc(p.openDate)}</b> 开标，仅剩 ${dl} 天！`,meta:dl+"天"});
+      else if(dl<=7) warns.push({lvl:"warn",ic:"⚠️",txt:`<span class="pn">${esc(p.name)}</span> 开标倒计时 ${dl} 天。`,meta:dl+"天"});
+    }
+    const dld = daysLeft(p.depDue);
+    if(dld!==null && pending.has(p.status) && !(p.steps&&p.steps.deposit_seal)){
+      if(dld<=2) warns.push({lvl:"danger",ic:"💸",txt:`<span class="pn">${esc(p.name)}</span> 保证金交付截止 ${esc(p.depDue)}，仅剩 ${dld} 天。`,meta:dld+"天"});
+      else if(dld<=7) warns.push({lvl:"warn",ic:"💸",txt:`<span class="pn">${esc(p.name)}</span> 保证金交付倒计时 ${dld} 天。`,meta:dld+"天"});
+    }
+    const pr = projectProgress(p);
+    if(dl!==null && dl<-5 && pending.has(p.status))
+      warns.push({lvl:"warn",ic:"📌",txt:`<span class="pn">${esc(p.name)}</span> 开标已过，仍处于「${ST[p.status].label}」，请更新定标结果。`,meta:"更新"});
+    const listAgo = -daysLeft(p.listDate);
+    if(listAgo>60 && pr.pct<30 && pending.has(p.status))
+      warns.push({lvl:"warn",ic:"🐢",txt:`<span class="pn">${esc(p.name)}</span> 挂网 ${listAgo} 天，流程仅完成 ${pr.pct}%，进展停滞。`,meta:listAgo+"天"});
+  });
+  const order = {danger:0, warn:1};
+  warns.sort((a,b)=>order[a.lvl]-order[b.lvl]);
+  return warns;
+}
+
+/* ══════════════ 驾驶舱渲染 ══════════════ */
+function renderDashboard(rows){
+  const byStatus = {};
+  STATUSES.forEach(s=>byStatus[s.key]=0);
+  rows.forEach(p=>byStatus[p.status]=(byStatus[p.status]||0)+1);
+  const total = rows.length;
+  const sumAmt = rows.reduce((s,p)=>s+Number(p.amt||0),0);
+  const sumDep = rows.reduce((s,p)=>s+Number(p.deposit||0),0);
+  const upcoming = rows.filter(p=>{ const d=daysLeft(p.openDate); return d!==null && d>=0 && (["track","eval","bid"].includes(p.status)); });
+  const winRows = rows.filter(p=>p.status==="win");
+  const inProgress = rows.filter(p=>["track","eval","bid"].includes(p.status)).length;
+  const warns = buildWarnings();
+  const doneRows = rows.filter(p=>["win","lost"].includes(p.status));
+  const winRate = doneRows.length? Math.round(winRows.length/doneRows.length*100) : 0;
+
+  const kpis = [
+    {l:"项目总数",v:total,c:"var(--accent)",s:"本视图"+total+"个",b:"linear-gradient(90deg,#2563eb,#0ea5e9)"},
+    {l:"进行中项目",v:inProgress,c:"var(--accent2)",s:"跟踪/评估/已投标",b:"linear-gradient(90deg,#0ea5e9,#06b6d4)"},
+    {l:"累计金额(亿)",v:fmt(sumAmt),c:"var(--ok)",s:"金额合计",b:"linear-gradient(90deg,#10b981,#059669)"},
+    {l:"保证金合计(万)",v:fmt(sumDep,0),c:"#f59e0b",s:"已登记保证金",b:"linear-gradient(90deg,#f59e0b,#f97316)"},
+    {l:"未来7天开标",v:upcoming.filter(p=>{const d=daysLeft(p.openDate);return d!==null&&d<=7;}).length,c:"var(--danger)",s:upcoming.length+"个待开标",b:"linear-gradient(90deg,#e11d48,#f43f5e)"},
+    {l:"中标项目",v:winRows.length,c:"#10b981",s:"中标率 "+winRate+"%",b:"linear-gradient(90deg,#059669,#10b981)"},
+    {l:"预警",v:warns.length,c:"#e11d48",s:warns.filter(w=>w.lvl==="danger").length+"条紧急",b:"linear-gradient(90deg,#e11d48,#fb7185)"},
+    {l:"平均进度",v:pct(rows.length? rows.reduce((s,p)=>s+projectProgress(p).pct,0)/rows.length : 0)+"%",c:"var(--accent2)",s:"流程完成度",b:"linear-gradient(90deg,#8b5cf6,#6366f1)"}
+  ];
+  $("kpiGrid").innerHTML = kpis.map(k=>`
+    <div class="kpi"><div class="lbl">${k.l}</div><div class="num" style="color:${k.c}">${k.v}</div>
+    <div class="sub">${k.s}</div><div class="bar2" style="background:${k.b}"></div></div>`).join("");
+
+  /* 预警列表 */
+  const wl = $("warnList");
+  if(!warns.length){ wl.innerHTML = `<div class="warn-item ok"><span class="ic">✅</span><div class="w-txt">当前无预警，继续保持！</div></div>`; }
+  else { wl.innerHTML = warns.map(w=>`
+    <div class="warn-item ${w.lvl}"><span class="ic">${w.ic}</span><div class="w-txt">${w.txt}</div><div class="w-meta">${w.meta}</div></div>`).join(""); }
+  $("warnCount").textContent = warns.length? warns.length+" 条预警" : "一切正常";
+  $("warnCount").className = "badge " + (warns.length? "warn":"ok");
+
+  /* 时间轴 */
+  const tl = rows.map(p=>({p,d:daysLeft(p.openDate)}))
+    .filter(x=>x.d!==null && x.d>=0 && ["track","eval","bid"].includes(x.p.status))
+    .sort((a,b)=>a.d-b.d).slice(0,8);
+  $("tlCount").textContent = tl.length+" 个待开标";
+  $("tlList").innerHTML = tl.length? tl.map(x=>{
+    const cls = x.d<=3?"danger":(x.d<=7?"warn":"ok");
+    return `<div class="ti"><span class="d">${esc(x.p.openDate)}</span><span class="n">${esc(x.p.name)}</span>
+      <span class="days" style="background:var(--${cls==="danger"?"redbg":"warnbg"});color:${cls==="danger"?"var(--danger)":(cls==="warn"?"#b45309":"var(--ok)")}">${x.d===0?"今天":x.d+"天后"}</span></div>`;
+  }).join("") : `<div style="padding:14px;color:var(--muted)">暂无待开标项目</div>`;
+
+  renderDonut(byStatus, total);
+  renderBars(rows);
+  renderTrend();
+}
+
+/* 环形图（conic-gradient） */
+function renderDonut(byStatus, total){
+  const el = $("statusChart");
+  if(!total){ el.innerHTML = `<div style="color:var(--muted)">暂无数据</div>`; return; }
+  let acc = 0; const seg = [];
+  STATUSES.forEach(s=>{
+    const v = byStatus[s.key]||0;
+    if(!v) return;
+    const from = acc/total*360, to=(acc+v)/total*360;
+    seg.push(`${s.color} ${from}deg ${to}deg`);
+    acc += v;
+  });
+  const html = `
+    <div class="donut" style="background:conic-gradient(${seg.join(",")})">
+      <div class="hole"><div><b>${total}</b><span style="color:var(--muted);font-size:11px">总项目</span></div></div>
+    </div>
+    <div class="legend">${STATUSES.map(s=>{
+      const v=byStatus[s.key]||0;
+      return `<div class="row"><span class="dot" style="background:${s.color}"></span>${s.label}<span class="cnt">${v} · ${total?Math.round(v/total*100):0}%</span></div>`;
+    }).join("")}</div>`;
+  el.innerHTML = html;
+}
+
+/* 条形图：按投标主体金额 */
+function renderBars(rows){
+  const el = $("bidderBars");
+  const groups = {};
+  rows.forEach(p=>{ const k=p.bidder||"未填写"; groups[k]=(groups[k]||0)+Number(p.amt||0); });
+  const arr = Object.entries(groups).map(([k,v])=>({k,v:Number(v.toFixed(2))})).sort((a,b)=>b.v-a.v);
+  if(!arr.length){ el.innerHTML=`<div style="color:var(--muted)">暂无数据</div>`; return; }
+  const max = Math.max(...arr.map(x=>x.v),1);
+  el.innerHTML = arr.map(x=>`
+    <div class="brow"><span class="bname" title="${esc(x.k)}">${esc(x.k)}</span>
+      <div class="btrack"><div class="fill" style="width:${x.v/max*100}%"></div></div>
+      <span class="bval">${fmt(x.v)} 亿</span></div>`).join("");
+}
+
+/* 趋势：近12个月 挂网/开标 数量 */
+function renderTrend(){
+  const svg = $("trendSvg");
+  const months = [];
+  const now = new Date(); now.setDate(1);
+  for(let i=11;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")); }
+  const countMap = () => { const o={}; months.forEach(m=>o[m]=0); return o; };
+  const listMap = countMap(), openMap = countMap();
+  data.forEach(p=>{
+    if(p.listDate){ const d=parseDate(p.listDate); if(d){ const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); if(k in listMap) listMap[k]++; } }
+    if(p.openDate){ const d=parseDate(p.openDate); if(d){ const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); if(k in openMap) openMap[k]++; } }
+  });
+  const listCount = months.map(m=>listMap[m]), openCount = months.map(m=>openMap[m]);
+  const W = 100, H = 100;
+  const maxV = Math.max(1, ...months.map(m=>Math.max(listCount[m],openCount[m])));
+  const padL=8, padB=18, padT=8;
+  const iw=W-padL-4, ih=H-padB-padT;
+  const step = iw/months.length;
+  const py = v => padT + ih - (v/maxV)*ih;
+  const linePath = arr => arr.map((v,i)=>`${i? "L":"M"}${(padL+step*i+step/2).toFixed(2)},${py(v).toFixed(2)}`).join(" ");
+  const points = arr => arr.map((v,i)=>`${(padL+step*i+step/2).toFixed(2)},${py(v).toFixed(2)}`).join(" ");
+  const gridLines = [0,0.5,1].map(r=>{ const y=padT+ih-ih*r; return `<line x1="${padL}" y1="${y}" x2="${W-4}" y2="${y}" stroke="currentColor" stroke-opacity=".08"/>`; }).join("");
+  const xLabels = months.map((m,i)=>{ const show=(i%2===0); return show?`<text x="${(padL+step*i+step/2).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="6" fill="currentColor" opacity=".6">${m.slice(5)}月</text>`:""; }).join("");
+  const yLabels = [0,1].map(r=>{ const v=Math.round(maxV*r); return `<text x="4" y="${(padT+ih-ih*r+2).toFixed(1)}" font-size="5" fill="currentColor" opacity=".5">${v}</text>`; }).join("");
+  svg.innerHTML = gridLines + yLabels + xLabels +
+    `<path d="${linePath(listCount)}" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-linejoin="round"/>`+
+    `<path d="${linePath(openCount)}" fill="none" stroke="#f97316" stroke-width="1.8" stroke-linejoin="round"/>`+
+    `<circle cx="${(padL+step*11+step/2).toFixed(1)}" cy="${py(listCount[11]).toFixed(1)}" r="1.6" fill="#3b82f6"/>`+
+    `<circle cx="${(padL+step*11+step/2).toFixed(1)}" cy="${py(openCount[11]).toFixed(1)}" r="1.6" fill="#f97316"/>`;
+}
+
+/* ══════════════ 任务看板 ══════════════ */
+function renderKanban(rows){
+  const col = $("kanban");
+  const byStatus = {};
+  STATUSES.forEach(s=>byStatus[s.key]=[]);
+  rows.forEach(p=>{ (byStatus[p.status]=byStatus[p.status]||[]).push(p); });
+  col.innerHTML = STATUSES.map(s=>`
+    <div class="kcol" data-status="${s.key}" ondrop="dropCard(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+      <div class="kcol-hd" style="border-left:4px solid ${s.color}">${s.label}<span class="cnt">${(byStatus[s.key]||[]).length}</span></div>
+      <div class="kcol-body">
+        ${(byStatus[s.key]||[]).map(p=>cardHTML(p)).join("")}
+      </div>
+    </div>`).join("");
+}
+function cardHTML(p){
+  const pr = projectProgress(p);
+  const dl = daysLeft(p.openDate);
+  const pend = ["track","eval","bid"].includes(p.status);
+  let dayChip = "";
+  if(dl!==null && pend){
+    const cls = dl<0 ? {bg:"var(--redbg)",c:"var(--danger)",t:"逾期"+(-dl)+"天"} : dl<=3 ? {bg:"var(--redbg)",c:"var(--danger)",t:dl+"天后"} : dl<=7 ? {bg:"var(--warnbg)",c:"#b45309",t:dl+"天后"} : {bg:"var(--panel2)",c:"var(--muted)",t:dl+"天后"};
+    dayChip = `<span class="daysp" style="background:${cls.bg};color:${cls.c}">开标 ${cls.t}</span>`;
+  }
+  const dd = daysLeft(p.depDue);
+  let depChip = "";
+  if(dd!==null && pend && !(p.steps&&p.steps.deposit_seal))
+    depChip = `<span class="daysp" style="background:${dd<=2?"var(--redbg)":"var(--warnbg)"};color:${dd<=2?"var(--danger)":"#b45309"}">保证金 ${dd<0?"逾期":dd+"天后"}</span>`;
+  const doneSteps = STEPS.map(s=>s[0]).filter(k=>p.steps&&p.steps[k]);
+  const stepChips = STEPS.map(s=>({on:!!(p.steps&&p.steps[s[0]]), label:s[1]})).slice(0,6);
+  return `<div class="kcard" draggable="true" ondragstart="dragStart(event,'${p.id}')" ondragend="dragEnd(event)" ondblclick="openModal(${p.id})">
+    <div class="kc-top"><span class="amt" style="color:${ST[p.status].color}">💰 ${fmt(p.amt)}亿</span>${dayChip}${depChip}</div>
+    <div class="kname">${esc(p.name)}</div>
+    <div class="dup"><div class="i" style="width:${pr.pct}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:3px">
+      <span>${pr.done}/${pr.total} 环节</span><span style="font-weight:700;color:${pr.pct>=80?"var(--ok)":"var(--accent)"}">${pr.pct}%</span>
+    </div>
+    <div class="kmeta">
+      <span class="km">🏢 ${esc(p.bidder||"—")}</span>
+      <span class="km">📅 ${esc(p.openDate||"—")}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span class="man">👤 ${esc(p.manager||"—")}</span>
+      <span style="font-size:11px;color:var(--muted)">双击编辑</span>
+    </div>
+  </div>`;
+}
+function dragStart(e,id){ dragId=id; e.dataTransfer.setData("text/plain", id); e.target.classList.add("drag"); }
+function dragEnd(e){ e.target.classList.remove("drag"); }
+function dragOver(e){ e.preventDefault(); e.currentTarget.classList.add("over"); }
+function dragLeave(e){ e.currentTarget.classList.remove("over"); }
+function dropCard(e){
+  e.preventDefault(); e.currentTarget.classList.remove("over");
+  if(!dragId) return;
+  const status = e.currentTarget.dataset.status;
+  const p = data.find(x=>String(x.id)===String(dragId));
+  if(p && p.status!==status){
+    p.status = status;
+    if(status==="win" || status==="lost"){
+      const dl = daysLeft(p.openDate);
+      if(dl!==null && dl>0){ p.openDate = new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0")+"-"+String(new Date().getDate()).padStart(2,"0"); }
+    }
+    saveData(); renderAll();
+    toast(`已将「${p.name}」移至「${ST[status].label}」`);
+  }
+  dragId=null;
+}
+
+/* ══════════════ 数据表格 ══════════════ */
+function renderTable(rows){
+  const head = $("gridHead");
+  head.innerHTML = `<tr>${COLUMNS.map(c=>{
+    const arr = sortKey===c[0] ? (sortDir>0?"▲":"▼") : "";
+    return `<th data-key="${c[0]}" class="${sortKey===c[0]?"sorted":""}" onclick="sortBy('${c[0]}')">${c[1]} <span class="arr">${arr}</span></th>`;
+  }).join("")}${["s_PROGRESS","s_STATUS","s_NOTE"].map(c=>{
+    const arr = sortKey===c ? (sortDir>0?"▲":"▼") : "";
+    const label = c==="s_PROGRESS"?"进度":(c==="s_STATUS"?"状态":c==="s_NOTE"?"备注":"");
+    return `<th data-key="${c}" class="${sortKey===c?"sorted":""}" onclick="sortBy('${c}')">${label} <span class="arr">${arr}</span></th>`;
+  }).join("")}<th style="cursor:default">操作</th></tr>`;
+  $("gridBody").innerHTML = rows.map(p=>{
+    const pr = projectProgress(p);
+    const st = ST[p.status]||{label:p.status,color:"#94a3b8"};
+    const dl = daysLeft(p.openDate);
+    const pend = ["track","eval","bid"].includes(p.status);
+    let dlCell = p.openDate||"—";
+    if(dl!==null && pend){
+      dlCell += ` <span class="daysp" style="background:${dl<=3?"var(--redbg)":"var(--panel2)"};color:${dl<=3?"var(--danger)":"var(--muted)"}">${daysAgoText(dl)}</span>`;
+    }
+    const dd = daysLeft(p.depDue);
+    const depPaid = p.steps && p.steps.deposit_seal;
+    let depCell = p.depDue||"—";
+    if(dd!==null && pend && !depPaid) depCell += ` <span class="daysp" style="background:var(--warnbg);color:#b45309">${dd<0?"逾期":dd+"天"}</span>`;
+    const tn = (w, t, s, extra="") => {
+      const star = s ? '<span style="color:var(--ok);font-weight:800;font-size:12px">&#10003;</span>'
+                     : '<span style="color:var(--muted);font-size:12px">·</span>';
+      return `<td><span class="t-cell" style="max-width:${w}px" title="${esc(t)}">${extra}${star} ${esc(t)}</span></td>`;
+    };
+    const cells = COLUMNS.map(c=>{
+      const k = c[0];
+      if(k==="id") return `<td>${p.id}</td>`;
+      if(k==="name") return `<td><span class="t-cell" style="max-width:230px" title="${esc(p.name)}">${esc(p.name)}</span></td>`;
+      if(k==="amt") return `<td class="amount">${fmt(p.amt)}</td>`;
+      if(k==="listDate") return `<td>${esc(p.listDate||"—")}</td>`;
+      if(k==="bidder") return `<td><span class="t-cell" style="max-width:130px" title="${esc(p.bidder||"")}">${esc(p.bidder||"—")}</span></td>`;
+      if(k==="openDate") return `<td>${dlCell}</td>`;
+      if(k==="depDue") return `<td>${depCell}</td>`;
+      if(k==="mode") return `${tn(150, p.mode||"—", false, "&#128221; ")}`;
+      if(k==="deposit") return `<td class="amount">${fmt(p.deposit,0)}</td>`;
+      if(k==="manager") return `<td>${esc(p.manager||"—")}</td>`;
+      if(STEP_COL_KEYS[k]) return `<td style="text-align:center"><span style="color:${(p.steps&&p.steps[STEP_COL_KEYS[k]])?"var(--ok)":"var(--muted)"};font-weight:800;font-size:13px">${(p.steps&&p.steps[STEP_COL_KEYS[k]])?"✓":"—"}</span></td>`;
+      return `<td>${esc(p[k]!=null?p[k]:"")}</td>`;
+    }).join("");
+    return `<tr>${cells}
+      <td><span class="tpl"><span class="i" style="width:${pr.pct}%"></span></span>${pr.pct}%</td>
+      <td><span class="stch" style="background:${st.color}">${st.label}</span></td>
+      <td><span class="t-cell" style="max-width:150px" title="${esc(p.note||"")}">${esc(p.note||"")}</span></td>
+      <td class="actions">
+        <button class="ia edit" onclick="openModal(${p.id})">&#9998;&#65039; 编辑</button>
+        <button class="ia del" onclick="deleteProject(${p.id})">&#128465;&#65039; 删除</button>
+      </td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="${COLUMNS.length+4}" style="text-align:center;color:var(--muted);padding:40px">没有匹配的数据</td></tr>`;
+  $("tCount").textContent = "共 "+rows.length+" 条";
+}
+function sortBy(key){
+  if(sortKey===key){ sortDir=-sortDir; } else { sortKey=key; sortDir=1; }
+  renderAll();
+}
+
+/* ══════════════ 视图切换 ══════════════ */
+function switchView(v){
+  view = v;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===v));
+  ["dashboard","kanban","table"].forEach(k=>$("view-"+k).classList.toggle("hidden", k!==v));
+  const rows = filteredData();
+  if(v==="dashboard") renderDashboard(rows);
+  if(v==="kanban") renderKanban(rows);
+  if(v==="table") renderTable(rows);
+}
+function renderAll(){
+  const rows = filteredData();
+  if(view==="dashboard") renderDashboard(rows);
+  if(view==="kanban") renderKanban(rows);
+  if(view==="table") renderTable(rows);
+  rebuildFilterOptions();
+}
+
+/* ══════════════ 新增 / 编辑 / 删除 ══════════════ */
+function openModal(id){
+  currentId = id || null;
+  const p = id ? data.find(x=>x.id===id) : null;
+  const isNew = !p;
+  const d = p || {name:"",amt:"",listDate:"",bidder:"",openDate:"",depDue:"",deposit:"",mode:"",manager:"",note:"",status:"track",steps:{}};
+  const stepsHTML = STEPS.map(s=>`
+    <label class="stp ${d.steps&&d.steps[s[0]]?"on":""}">
+      <input type="checkbox" data-step="${s[0]}" ${d.steps&&d.steps[s[0]]?"checked":""}>${s[1]}</label>`).join("");
+  $("modalRoot").innerHTML = `
+  <div class="modal-mask" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="m-hd">${isNew?"新增项目":"编辑项目"}<button class="x" onclick="closeModal()">✕</button></div>
+      <div class="m-bd">
+        <div class="fgrid">
+          <div class="ff full"><label>项目名称 <b>*</b></label><input id="f_name" type="text" value="${esc(d.name)}" placeholder="必填"></div>
+          <div class="ff"><label>金额（亿元）</label><input id="f_amt" type="number" step="0.01" min="0" value="${d.amt}"></div>
+          <div class="ff"><label>投标主体</label><input id="f_bidder" type="text" value="${esc(d.bidder)}"></div>
+          <div class="ff"><label>挂网时间</label><input id="f_list" type="date" value="${esc(d.listDate)}"></div>
+          <div class="ff"><label>开标时间</label><input id="f_open" type="date" value="${esc(d.openDate)}"></div>
+          <div class="ff"><label>保证金交付时间</label><input id="f_depdue" type="date" value="${esc(d.depDue)}"></div>
+          <div class="ff"><label>保证金（万元）</label><input id="f_dep" type="number" step="0.01" min="0" value="${d.deposit}"></div>
+          <div class="ff"><label>投标状态</label>
+            <select id="f_status">${STATUSES.map(s=>`<option value="${s.key}" ${d.status===s.key?"selected":""}>${s.label}</option>`).join("")}</select></div>
+          <div class="ff"><label>责任客户经理</label><input id="f_manager" type="text" value="${esc(d.manager)}"></div>
+          <div class="ff full"><label>招标模式及评标办法</label><input id="f_mode" type="text" value="${esc(d.mode)}"></div>
+          <div class="ff full"><label>备注</label><textarea id="f_note">${esc(d.note)}</textarea></div>
+        </div>
+        <div class="ff-title">📋 投标流程环节（勾选完成项，自动计算进度）</div>
+        <div class="steps">${stepsHTML}</div>
+      </div>
+      <div class="m-ft">
+        <button class="btn" onclick="closeModal()">取消</button>
+        ${isNew?"":`<button class="btn danger" style="margin-right:auto" onclick="deleteProject(${p.id})">删除该项目</button>`}
+        <button class="btn primary" onclick="saveModal()">保存</button>
+      </div>
+    </div>
+  </div>`;
+  $("modalRoot").addEventListener("change", e=>{
+    if(e.target.matches(".stp")){ e.target.closest(".stp").classList.toggle("on", e.target.checked); }
+  });
+}
+function saveModal(){
+  const name = $("f_name").value.trim();
+  if(!name){ toast("项目名称不能为空", true); $("f_name").focus(); return; }
+  const obj = {
+    name,
+    amt: parseFloat($("f_amt").value)||0,
+    bidder: $("f_bidder").value.trim(),
+    listDate: $("f_list").value,
+    openDate: $("f_open").value,
+    depDue: $("f_depdue").value,
+    deposit: parseFloat($("f_dep").value)||0,
+    mode: $("f_mode").value.trim(),
+    manager: $("f_manager").value.trim(),
+    note: $("f_note").value.trim(),
+    status: $("f_status").value,
+    steps: {}
+  };
+  document.querySelectorAll(".stp input").forEach(cb=>{ obj.steps[cb.dataset.step] = cb.checked ? 1 : 0; });
+  if(currentId){
+    const p = data.find(x=>x.id===currentId);
+    Object.assign(p, obj);
+    toast("已保存修改");
+  } else {
+    obj.id = data.length ? Math.max(...data.map(x=>x.id))+1 : 1;
+    data.push(obj);
+    toast("已新增项目");
+  }
+  saveData(); closeModal(); renderAll();
+}
+function deleteProject(id){
+  if(!confirm("确定删除该项目吗？此操作不可恢复。")) return;
+  data = data.filter(x=>x.id!==id);
+  saveData(); closeModal(); renderAll();
+  toast("已删除");
+}
+function closeModal(){ $("modalRoot").innerHTML=""; currentId=null; }
+
+/* ══════════════ Excel 导入 / 导出 ══════════════ */
+function exportExcel(){
+  const rows = filteredData();
+  if(!rows.length){ toast("当前没有可导出的数据", true); return; }
+  if(typeof XLSX==="undefined"){ toast("Excel 组件加载失败，请联网后重试", true); return; }
+  const aoa = [EXCEL_HEADERS];
+  rows.forEach((p,i)=>{
+    const pr = projectProgress(p);
+    const row = [
+      i+1, p.name, p.amt, p.listDate, p.bidder, p.openDate, p.depDue
+    ];
+    STEPS.forEach(s=>row.push(p.steps&&p.steps[s[0]]?"完成":""));
+    row.push(p.mode, p.deposit, p.manager, (ST[p.status]||{}).label||p.status, pr.pct, pr.done);
+    aoa.push(row);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = EXCEL_HEADERS.map(h=>({wch: h.length*2.2+6}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "投标项目一览");
+  XLSX.writeFile(wb, "投标项目跟踪_" + new Date().toISOString().slice(0,10) + ".xlsx");
+  toast("已导出 " + rows.length + " 条记录为 Excel");
+}
+$("xlsxFile").addEventListener("change", e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  if(typeof XLSX==="undefined"){ toast("Excel 组件加载失败，请联网后重试", true); return; }
+  const rd = new FileReader();
+  rd.onload = ev=>{
+    try{
+      const wb = XLSX.read(ev.target.result, {type:"array"});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const aoa = XLSX.utils.sheet_to_json(ws, {header:1, defval:""});
+      const H = aoa[0].map(h=>String(h||"").trim());
+      const idx = {};
+      const alias = {
+        name:["项目名称","项目名","名称"], amt:["金额(亿元)","金额","金额(亿)"], listDate:["挂网时间","挂网日期"],
+        bidder:["投标主体","主体"], openDate:["开标时间","开标日期"], depDue:["保证金交付时间","保证金交付"],
+        deposit:["保证金(万元)","保证金"], mode:["招标模式及评标办法","招标模式","评标办法"], manager:["责任客户经理","负责人","客户经理"],
+        note:["备注","说明"], status:["投标状态","状态"]
+      };
+      H.forEach((h,i)=>{ for(const k in alias){ if(alias[k].includes(h)){ idx[k]=i; break; } } });
+      STEPS.forEach(s=>{ H.forEach((h,i)=>{ if(h===s[1]) idx["step_"+s[0]]=i; }); });
+      let count=0;
+      for(let r=1;r<aoa.length;r++){
+        const row=aoa[r]; if(!row) continue;
+        const name = String(row[idx.name]!=null?row[idx.name]:"").trim();
+        if(!name) continue;
+        const statusTxt = String(row[idx.status]!=null?row[idx.status]:"").trim();
+        let status = STATUSES.find(s=>s.label===statusTxt);
+        const obj = {
+          name,
+          amt: parseFloat(row[idx.amt])||0,
+          listDate: String(row[idx.listDate]!=null?row[idx.listDate]:"").trim() || "",
+          bidder: String(row[idx.bidder]!=null?row[idx.bidder]:"").trim(),
+          openDate: String(row[idx.openDate]!=null?row[idx.openDate]:"").trim() || "",
+          depDue: String(row[idx.depDue]!=null?row[idx.depDue]:"").trim() || "",
+          deposit: parseFloat(row[idx.deposit])||0,
+          mode: String(row[idx.mode]!=null?row[idx.mode]:"").trim(),
+          manager: String(row[idx.manager]!=null?row[idx.manager]:"").trim(),
+          note: String(row[idx.note]!=null?row[idx.note]:"").trim(),
+          status: status?status.key:"track",
+          steps: {}
+        };
+        STEPS.forEach(s=>{ obj.steps[s[0]] = (String(row[idx["step_"+s[0]]]!=null?row[idx["step_"+s[0]]]:"").includes("完成")) ? 1 : 0; });
+        const dup = data.find(x=>x.name===obj.name);
+        if(dup) Object.assign(dup, obj); else { obj.id = data.length? Math.max(...data.map(x=>x.id))+1 : 1; data.push(obj); }
+        count++;
+      }
+      saveData(); renderAll();
+      toast("导入完成：" + count + " 条（同名项目已更新）");
+    }catch(err){
+      console.error(err);
+      toast("导入失败：" + err.message, true);
+    }
+  };
+  rd.readAsArrayBuffer(f);
+  e.target.value="";
+});
+
+/* ══════════════ JSON 备份 / 恢复 / 主题 ══════════════ */
+function backupJSON(){
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "投标项目备份_" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("已导出 JSON 备份，可在控制台恢复");
+}
+function darkToggle(){
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  $("themeBtn").textContent = isDark? "☀️ 浅色" : "🌙 深色";
+  localStorage.setItem("toubiao_kanban_theme", isDark? "dark":"light");
+}
+function rebuildFilterOptions(){
+  const stSel = $("fStatus"), mgSel = $("fManager");
+  const stVal = stSel.value, mgVal = mgSel.value;
+  stSel.innerHTML = `<option value="全部">全部</option>` + STATUSES.map(s=>`<option value="${s.key}">${s.label}</option>`).join("");
+  stSel.value = stVal;
+  const mgs = [...new Set(data.map(p=>p.manager).filter(Boolean))];
+  mgSel.innerHTML = `<option value="全部">全部</option>` + mgs.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join("");
+  mgSel.value = mgVal;
+}
+function toast(msg, isErr){
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = isErr? "show err" : "show";
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.className="", 2600);
+}
+
+/* ══════════════ 初始化 ══════════════ */
+document.addEventListener("DOMContentLoaded", ()=>{
+  $("hdrDate").textContent = new Date().getFullYear()+"年"+(new Date().getMonth()+1)+"月"+new Date().getDate()+"日";
+  if(localStorage.getItem("toubiao_kanban_theme")==="dark"){ document.body.classList.add("dark"); $("themeBtn").textContent="☀️ 浅色"; }
+  document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click", ()=>switchView(t.dataset.view)));
+  ["fKw","fStatus","fManager","fFrom","fTo"].forEach(id=>{ $(id).addEventListener("input", ()=>renderAll()); $(id).addEventListener("change", ()=>renderAll()); });
+  switchView("dashboard");
+});
+</script>
+</body>
+</html>
