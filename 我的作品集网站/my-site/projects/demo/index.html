@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>示例作品：数据看板</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #e2e8f0; min-height: 100vh; padding: 40px 5vw;
+  }
+  .head { text-align: center; margin-bottom: 34px; }
+  .head h1 { font-size: 26px; letter-spacing: 2px; }
+  .head p { color: #94a3b8; font-size: 14px; margin-top: 6px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto; }
+  .card {
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px; padding: 22px; backdrop-filter: blur(6px);
+  }
+  .card .num { font-size: 34px; font-weight: 700; color: #60a5fa; }
+  .card .num.green { color: #34d399; }
+  .card .num.orange { color: #fbbf24; }
+  .card .num.pink { color: #f472b6; }
+  .card .label { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+  .chart { max-width: 900px; margin: 30px auto 0; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 24px 28px; }
+  .chart h2 { font-size: 17px; margin-bottom: 18px; }
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .row .name { width: 120px; font-size: 14px; color: #cbd5e1; text-align: right; }
+  .row .bar-bg { flex: 1; background: rgba(255,255,255,.08); border-radius: 6px; height: 18px; overflow: hidden; }
+  .row .bar { height: 100%; border-radius: 6px; background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .row .val { width: 60px; font-size: 13px; color: #94a3b8; }
+  .note { text-align: center; color: #64748b; font-size: 13px; margin-top: 34px; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>📊 项目数据看板</h1>
+    <p>这是一个演示用的示例作品页面</p>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="num">128</div><div class="label">项目总数</div></div>
+    <div class="card"><div class="num green">96%</div><div class="label">按期完成率</div></div>
+    <div class="card"><div class="num orange">32</div><div class="label">进行中</div></div>
+    <div class="card"><div class="num pink">7</div><div class="label">重点关注</div></div>
+  </div>
+
+  <div class="chart">
+    <h2>各季度完成情况</h2>
+    <div class="row"><span class="name">第一季度</span><div class="bar-bg"><div class="bar" style="width:72%"></div></div><span class="val">72%</span></div>
+    <div class="row"><span class="name">第二季度</span><div class="bar-bg"><div class="bar" style="width:85%"></div></div><span class="val">85%</span></div>
+    <div class="row"><span class="name">第三季度</span><div class="bar-bg"><div class="bar" style="width:64%"></div></div><span class="val">64%</span></div>
+    <div class="row"><span class="name">第四季度</span><div class="bar-bg"><div class="bar" style="width:48%"></div></div><span class="val">48%</span></div>
+  </div>
+
+  <p class="note">※ 示例作品，请替换为你自己的网页（整个 projects/demo 文件夹都可以删掉）</p>
+</body>
+</html>

@@ -1,0 +1,7 @@
+这个文件夹用来存放 PDF / Word / Excel / PPT 文档。
+
+上传方法：在 GitHub 仓库页面进入 docs 文件夹 → 点 Add file → Upload files → 拖入文件 → Commit changes。
+
+上传后记得在 works.js 里登记一条（见 works.js 里的说明）。
+
+注意：文件名建议用英文或数字，如 report.pdf、data.xlsx。
